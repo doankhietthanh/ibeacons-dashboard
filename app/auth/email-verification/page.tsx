@@ -1,7 +1,7 @@
 import CardWrapper from "@/components/auth/card-wrapper";
-import { NewVerificationForm } from "@/components/auth/new-verification-form";
+import { EmailVerificationForm } from "@/components/auth/email-verification-form";
 
-const NewVerificationPage = () => {
+const EmailVerificationPage = () => {
   return (
     <CardWrapper
       headerTitle="Confim Email"
@@ -9,9 +9,9 @@ const NewVerificationPage = () => {
       backButtonTitle="Back to Login"
       backButtonHref="/auth/sign-in"
     >
-      <NewVerificationForm />
+      <EmailVerificationForm />
     </CardWrapper>
   );
 };
 
-export default NewVerificationPage;
+export default EmailVerificationPage;

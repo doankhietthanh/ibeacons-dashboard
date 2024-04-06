@@ -1,13 +1,13 @@
 "use client";
 
-import { newVerification } from "@/actions/auth/email-verification";
-import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import { emailActions } from "@/actions/auth/email-actions";
+import { useSearchParams } from "next/navigation";
 import { BeatLoader } from "react-spinners";
-import ErrorAlert from "@/components/auth/error-alert";
-import SuccessAlert from "@/components/auth/success-alert";
+import ErrorAlert from "@/components/error-alert";
+import SuccessAlert from "@/components/success-alert";
 
-export const NewVerificationForm = () => {
+export const EmailVerificationForm = () => {
   const [errorMessage, setErrorMessage] = useState<string | undefined>("");
   const [successMessage, setSuccessMessage] = useState<string | undefined>("");
 
@@ -21,8 +21,8 @@ export const NewVerificationForm = () => {
       return;
     }
 
-    if (!mode) {
-      setErrorMessage("Missing mode parameter");
+    if (!mode && mode !== "verifyEmail") {
+      setErrorMessage("Missing mode parameter or mode is not verifyEmail");
       return;
     }
 
@@ -31,7 +31,7 @@ export const NewVerificationForm = () => {
       return;
     }
 
-    newVerification(mode, actionCode, continueUrl)
+    emailActions(mode, actionCode, continueUrl)
       .then((data) => {
         setSuccessMessage(data.success);
         setErrorMessage(data.error);

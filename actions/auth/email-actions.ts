@@ -3,7 +3,7 @@ import firebase from "@/lib/firebase";
 
 const auth = getAuth(firebase);
 
-export const emailVerification = async (
+export const emailActions = async (
   mode: string,
   actionCode: string,
   continueUrl: string | null,
@@ -17,6 +17,7 @@ export const emailVerification = async (
           success: "Email verified successfully",
         };
       } catch (error: any) {
+        console.log(error);
         return {
           error: "An error occurred while verifying email: " + error.code,
         };

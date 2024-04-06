@@ -1,11 +1,11 @@
 import { MetadataRoute } from "next";
+import { siteConfig } from "@/config/site";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Đạo Cụ Việt",
-    short_name: "Đạo Cụ Việt",
-    description:
-      "Chuyên cung cấp đạo cụ sân khấu, thiết bị sự kiện và dụng cụ cỗ vũ",
+    name: siteConfig.name,
+    short_name: siteConfig.name,
+    description: siteConfig.description,
     start_url: "/",
     display: "standalone",
     background_color: "#fff",
