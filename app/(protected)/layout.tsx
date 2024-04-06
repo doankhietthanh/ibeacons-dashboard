@@ -71,7 +71,7 @@ export default function ProtectedLayout({
       <div className="hidden md:block">
         <DesktopNav routes={routers} />
       </div>
-      <div className="container">{children}</div>
+      <div className="container mb-16 md:mb-0">{children}</div>
       <div className="block md:hidden">
         <MobileNavbar routes={routers} />
       </div>

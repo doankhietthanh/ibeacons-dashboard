@@ -24,16 +24,13 @@ const generalSettingsFormSchema = z.object({
 
 type GeneralSettingsFormValues = z.infer<typeof generalSettingsFormSchema>;
 
-// This can come from your database or API.
-const defaultValues: Partial<GeneralSettingsFormValues> = {
-  theme: "light",
-};
-
 const GeneralSettingsForm = () => {
   const theme = useTheme();
   const form = useForm<GeneralSettingsFormValues>({
     resolver: zodResolver(generalSettingsFormSchema),
-    defaultValues,
+    defaultValues: {
+      theme: theme.theme as GeneralSettingsFormValues["theme"],
+    },
   });
 
   const onSubmit = (data: GeneralSettingsFormValues) => {
