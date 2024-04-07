@@ -32,8 +32,8 @@ const routers: NavbarItemProps[] = [
     icon: <HomeIcon />,
   },
   {
-    title: "Devices",
-    href: "/devices",
+    title: "Manager",
+    href: "/manager",
     icon: <Settings2Icon />,
   },
   {

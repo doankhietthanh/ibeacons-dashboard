@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState, useTransition } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -22,15 +22,12 @@ import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getAuth, User } from "firebase/auth";
 import { Badge } from "@/components/ui/badge";
-import { CloudUploadIcon, PencilIcon } from "lucide-react";
+import { PencilIcon } from "lucide-react";
 import firebase from "@/lib/firebase";
-import {
-  getDownloadURL,
-  getStorage,
-  ref as storageRef,
-} from "@firebase/storage";
+import { getDownloadURL, getStorage, ref } from "@firebase/storage";
 import { useUploadFile } from "react-firebase-hooks/storage";
 import { useUpdateProfile } from "react-firebase-hooks/auth";
+import { Icons } from "@/components/icons";
 
 type ProfileFormValues = z.infer<typeof ProfileSchema>;
 
@@ -38,13 +35,14 @@ const storage = getStorage(firebase);
 const auth = getAuth(firebase);
 
 const ProfileForm = ({ user }: { user: User }) => {
-  const ref = storageRef(storage, `users/${user.uid}/avatar.jpg`);
+  const storageRef = ref(storage, `users/${user.email}/avatar.jpg`);
   const [uploadFile] = useUploadFile();
-  const [updateProfile, updating, authError] = useUpdateProfile(auth);
+  const [updateProfile] = useUpdateProfile(auth);
 
   const [avatar, setAvatar] = useState<string | null>(null);
   const [selectedAvatar, setSelectedAvatar] = useState<File | null>(null);
   const [isEditAvatar, setIsEditAvatar] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
   const { toast } = useToast();
 
@@ -57,43 +55,34 @@ const ProfileForm = ({ user }: { user: User }) => {
     mode: "onChange",
   });
 
-  const uploadAvatar = async () => {
-    if (selectedAvatar) {
+  const onSubmit = async (data: ProfileFormValues) => {
+    startTransition(async () => {
       try {
-        const result = await uploadFile(ref, selectedAvatar, {
-          contentType: "image/jpeg",
-        });
-        setAvatar(await getDownloadURL(ref));
+        // Upload avatar
+        if (selectedAvatar) {
+          await uploadFile(storageRef, selectedAvatar, {
+            contentType: "image/jpeg",
+          });
+          setAvatar(await getDownloadURL(storageRef));
+        }
+        // Update profile
+        const updateData = {
+          displayName: data.name,
+          photoURL: avatar,
+        };
+        await updateProfile(updateData);
         toast({
-          title: "Avatar uploaded successfully.",
+          title: "Profile updated successfully.",
           variant: "success",
         });
-      } catch (error) {
+        setIsEditAvatar(false);
+      } catch (e) {
         toast({
-          title: "Avatar upload failed. Please try again.",
+          title: "Profile update failed. Please try again.",
           variant: "destructive",
         });
       }
-    }
-  };
-
-  const onSubmit = async (data: ProfileFormValues) => {
-    try {
-      const updateData = {
-        displayName: data.name,
-        photoURL: avatar,
-      };
-      await updateProfile(updateData);
-      toast({
-        title: "Profile updated successfully.",
-        variant: "success",
-      });
-    } catch (e) {
-      toast({
-        title: "Profile update failed. Please try again.",
-        variant: "destructive",
-      });
-    }
+    });
   };
 
   return (
@@ -106,28 +95,18 @@ const ProfileForm = ({ user }: { user: User }) => {
           <AvatarFallback>{user.displayName?.at(0)}</AvatarFallback>
         </Avatar>
         {isEditAvatar ? (
-          <div className="flex items-end justify-center gap-5">
-            <div className="grid w-full max-w-sm items-center gap-1.5">
-              <Label htmlFor="avatar">Upload image</Label>
-              <Input
-                id="avatar"
-                type="file"
-                onChange={(event) => {
-                  if (event.target.files) {
-                    setSelectedAvatar(event.target.files[0]);
-                    setAvatar(URL.createObjectURL(event.target.files[0]));
-                  }
-                }}
-              />
-            </div>
-            <Button
-              size="icon"
-              onClick={async () => {
-                await uploadAvatar();
+          <div className="grid w-full max-w-sm items-center gap-1.5">
+            <Label htmlFor="avatar">Upload image</Label>
+            <Input
+              id="avatar"
+              type="file"
+              onChange={(event) => {
+                if (event.target.files) {
+                  setSelectedAvatar(event.target.files[0]);
+                  setAvatar(URL.createObjectURL(event.target.files[0]));
+                }
               }}
-            >
-              <CloudUploadIcon />
-            </Button>
+            />
           </div>
         ) : (
           <>
@@ -182,7 +161,12 @@ const ProfileForm = ({ user }: { user: User }) => {
               {user.emailVerified.toString()}
             </Badge>
           </div>
-          <Button type="submit">Update profile</Button>
+          <Button disabled={isPending} type="submit">
+            {isPending && (
+              <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+            )}
+            Update profile
+          </Button>
         </form>
       </Form>
     </>
