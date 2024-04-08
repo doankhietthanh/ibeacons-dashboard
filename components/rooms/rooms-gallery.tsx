@@ -1,11 +1,4 @@
-import React from "react";
-
-import firebase from "@/lib/firebase";
-import { getFirestore } from "firebase/firestore";
-import { collection, query, where } from "@firebase/firestore";
-import { useCollection } from "react-firebase-hooks/firestore";
-
-import { Collections } from "@/types/collections";
+import React, { useEffect, useState, useTransition } from "react";
 
 import { Room } from "@/types/room";
 import Loader from "@/components/loader";
@@ -21,25 +14,27 @@ import {
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import Image from "next/image";
 import Link from "next/link";
-import { getAuth } from "firebase/auth";
-import { useAuthState } from "react-firebase-hooks/auth";
-
-const auth = getAuth(firebase);
-const db = getFirestore(firebase);
+import { STATUS_RESPONSE } from "@/constants";
+import { getRooms } from "@/actions/rooms";
 
 const RoomsGallery = () => {
-  const [user, authLoading, authError] = useAuthState(auth);
-  const [rooms, dbLoading, dbError] = useCollection(
-    query(
-      collection(db, Collections.ROOMS),
-      where("createdBy", "==", user?.uid),
-    ),
-    {
-      snapshotListenOptions: { includeMetadataChanges: true },
-    },
-  );
+  const [isPending, startTransition] = useTransition();
+  const [rooms, setRooms] = useState<Room[] | null>(null);
+  const [error, setError] = useState<any>(null);
 
-  if (authLoading || dbLoading) {
+  useEffect(() => {
+    startTransition(async () => {
+      const response = await getRooms();
+      if (response.status === STATUS_RESPONSE.SUCCESS) {
+        setRooms(response.data as Room[]);
+      }
+      if (response.status === STATUS_RESPONSE.ERROR) {
+        setError(response.message);
+      }
+    });
+  }, [startTransition]);
+
+  if (isPending) {
     return (
       <div className="flex h-full w-full items-center justify-center">
         <Loader />
@@ -47,27 +42,33 @@ const RoomsGallery = () => {
     );
   }
 
-  if (authError || dbError) {
+  if (error) {
     return (
       <div className="flex h-full w-full items-center justify-center">
-        <ErrorAlert message={authError?.message || dbError?.message} />
+        <ErrorAlert message={error} />
       </div>
     );
   }
 
-  console.log(rooms);
+  if (!rooms) {
+    return (
+      <div className="flex h-full w-full items-center justify-center">
+        <ErrorAlert message="No rooms found." />
+      </div>
+    );
+  }
+
   return (
-    <div className="flex h-full w-full items-center justify-center md:justify-start">
-      {rooms &&
-        rooms.docs.map((doc) => (
-          <Link
-            href={`/manager/rooms/${doc.id}`}
-            key={doc.id}
-            className="w-full cursor-pointer md:w-[400px]"
-          >
-            <RoomCard room={doc.data() as Room} />
-          </Link>
-        ))}
+    <div className="grid h-full w-full grid-cols-1 justify-items-center gap-5 md:grid-cols-2 lg:grid-cols-3">
+      {rooms.map((room) => (
+        <Link
+          href={`/manager/rooms/${room.id}`}
+          key={room.id}
+          className="w-full cursor-pointer lg:max-w-[400px]"
+        >
+          <RoomCard room={room as Room} />
+        </Link>
+      ))}
     </div>
   );
 };
@@ -75,7 +76,6 @@ const RoomsGallery = () => {
 export default RoomsGallery;
 
 const RoomCard = ({ room }: { room: Room }) => {
-  console.log(room);
   return (
     <Card>
       <AspectRatio ratio={16 / 9}>
@@ -90,8 +90,10 @@ const RoomCard = ({ room }: { room: Room }) => {
       </AspectRatio>
       <CardHeader>
         <CardTitle>{room.name}</CardTitle>
+        <CardDescription className="h-full w-full truncate">
+          {room.description}
+        </CardDescription>
       </CardHeader>
-      <CardDescription>{room.description}</CardDescription>
       <CardContent>
         Size: {room.width}x{room.height}
       </CardContent>

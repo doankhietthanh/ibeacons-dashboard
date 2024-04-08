@@ -20,29 +20,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-
-import { getUserCreatedInfo } from "@/common/user";
-import firebase from "@/lib/firebase";
-import { getAuth } from "firebase/auth";
-import { useAuthState } from "react-firebase-hooks/auth";
-import { useUploadFile } from "react-firebase-hooks/storage";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { getDownloadURL, getStorage, ref } from "@firebase/storage";
 import { useToast } from "@/components/ui/use-toast";
 import { Icons } from "@/components/icons";
-import { setDoc } from "@firebase/firestore";
-import { doc, getFirestore } from "firebase/firestore";
-import { Collections } from "@/types/collections";
 import { Textarea } from "@/components/ui/textarea";
-
-const auth = getAuth(firebase);
-const storage = getStorage(firebase);
-const db = getFirestore(firebase);
+import { createRoom } from "@/actions/rooms";
 
 const CreateRoomForm = () => {
-  const [user] = useAuthState(auth);
-  const [uploadFile] = useUploadFile();
-
   const [backgroundCover, setBackgroundCover] = useState<File | null>(null);
   const [roomMap, setRoomMap] = useState<File | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -55,45 +39,17 @@ const CreateRoomForm = () => {
       id: uuidv4(),
       backgroundCover: "https://picsum.photos/id/237/200/300",
       map: "https://picsum.photos/id/238/200/300",
-      ...getUserCreatedInfo(user),
     },
   });
 
   const onSubmit = async (values: z.infer<typeof CreateRoomSchema>) => {
     startTransition(async () => {
-      try {
-        // Upload background cover
-        if (backgroundCover) {
-          const storageRef = ref(
-            storage,
-            `rooms/${values.id}/background-cover.jpg`,
-          );
-          await uploadFile(storageRef, backgroundCover, {
-            contentType: "image/jpeg",
-          });
-          values.backgroundCover = await getDownloadURL(storageRef);
-        }
-        // Upload room map
-        if (roomMap) {
-          const storageRef = ref(storage, `rooms/${values.id}/map.jpg`);
-          await uploadFile(storageRef, roomMap, {
-            contentType: "image/jpeg",
-          });
-          values.map = await getDownloadURL(storageRef);
-        }
-        // Create room
-        await setDoc(doc(db, Collections.ROOMS, values.id), values);
-        toast({
-          title: "Created room successfully.",
-          variant: "success",
-        });
-      } catch (error) {
-        console.error(error);
-        toast({
-          title: "Failed to create room. Please try again.",
-          variant: "destructive",
-        });
-      }
+      const result = await createRoom(values, backgroundCover, roomMap);
+      toast({
+        title: result.status === "success" ? "Room created" : "Error",
+        description: result.message as string,
+        variant: result.status === "success" ? "success" : "destructive",
+      });
     });
   };
 

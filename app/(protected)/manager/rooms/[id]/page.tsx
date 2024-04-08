@@ -1,32 +1,34 @@
 "use client";
 
-import React from "react";
-
-import firebase from "@/lib/firebase";
-import { doc, getFirestore } from "firebase/firestore";
-import { useDocument } from "react-firebase-hooks/firestore";
+import React, { useEffect, useState, useTransition } from "react";
 
 import { Separator } from "@/components/ui/separator";
 import Loader from "@/components/loader";
 import ErrorAlert from "@/components/error-alert";
-import { Collections } from "@/types/collections";
 import { Room } from "@/types/room";
 import Image from "next/image";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { PencilIcon } from "lucide-react";
-
-const db = getFirestore(firebase);
+import { getRoom } from "@/actions/rooms";
+import { STATUS_RESPONSE } from "@/constants";
+import RoomDetailDropdown from "@/components/rooms/detail/room-detail-dropdown";
 
 const RoomDetailPage = ({ params }: { params: { id: string } }) => {
-  const [roomSnapshot, loading, error] = useDocument(
-    doc(db, Collections.ROOMS, params.id),
-    {
-      snapshotListenOptions: { includeMetadataChanges: true },
-    },
-  );
+  const [isPending, startTransition] = useTransition();
+  const [room, setRoom] = useState<Room | null>(null);
+  const [error, setError] = useState<any>(null);
 
-  if (loading) {
+  useEffect(() => {
+    startTransition(async () => {
+      const response = await getRoom(params.id);
+      if (response.status === STATUS_RESPONSE.SUCCESS) {
+        setRoom(response.data as Room);
+      }
+      if (response.status === STATUS_RESPONSE.ERROR) {
+        setError(response);
+      }
+    });
+  }, [params.id, startTransition]);
+
+  if (isPending) {
     return (
       <div className="flex h-full w-full items-center justify-center">
         <Loader />
@@ -42,15 +44,13 @@ const RoomDetailPage = ({ params }: { params: { id: string } }) => {
     );
   }
 
-  if (!roomSnapshot) {
+  if (!room) {
     return (
       <div className="flex h-full w-full items-center justify-center">
         <ErrorAlert message="Room not found." />
       </div>
     );
   }
-
-  const room = roomSnapshot.data() as Room;
 
   return (
     <div className="block space-y-6 py-5 md:container md:p-10">
@@ -61,12 +61,7 @@ const RoomDetailPage = ({ params }: { params: { id: string } }) => {
             {room.description}
           </p>
         </div>
-        <Link href={`/manager/rooms/update/${room.id}`}>
-          <Button variant="default">
-            <PencilIcon className="mr-2 h-6 w-6" />
-            Update room
-          </Button>
-        </Link>
+        <RoomDetailDropdown room={room} />
       </div>
       <Separator className="my-6" />
       <div className="flex flex-col space-y-8 lg:flex-row lg:space-x-12 lg:space-y-0">

@@ -16,3 +16,21 @@ export interface Room {
   createdAt?: Date;
   updatedAt?: Date;
 }
+
+export interface RoomUpdate {
+  name: string;
+  description?: string;
+  backgroundCover?: string;
+  members?: string[];
+
+  // map?: string;
+  // width?: number;
+  // height?: number;
+  stations?: string[];
+  devices?: string[];
+
+  createdBy?: string;
+  updatedBy?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
