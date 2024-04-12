@@ -1,9 +1,11 @@
+import { Member } from "@/types/user";
+
 export interface Room {
   id: string;
   name: string;
   description?: string;
   backgroundCover?: string;
-  members?: string[];
+  members?: Member[];
 
   map?: string;
   width?: number;
@@ -18,10 +20,10 @@ export interface Room {
 }
 
 export interface RoomUpdate {
-  name: string;
+  name?: string;
   description?: string;
   backgroundCover?: string;
-  members?: string[];
+  members?: Member[];
 
   // map?: string;
   // width?: number;

@@ -7,9 +7,9 @@ import Loader from "@/components/loader";
 import ErrorAlert from "@/components/error-alert";
 import { Room } from "@/types/room";
 import Image from "next/image";
-import { getRoom } from "@/actions/rooms";
+import RoomAction from "@/actions/rooms";
 import { STATUS_RESPONSE } from "@/constants";
-import RoomDetailDropdown from "@/components/rooms/detail/room-detail-dropdown";
+import RoomActionsDropdown from "@/components/rooms/detail/room-actions-dropdown";
 
 const RoomDetailPage = ({ params }: { params: { id: string } }) => {
   const [isPending, startTransition] = useTransition();
@@ -18,7 +18,7 @@ const RoomDetailPage = ({ params }: { params: { id: string } }) => {
 
   useEffect(() => {
     startTransition(async () => {
-      const response = await getRoom(params.id);
+      const response = await RoomAction.getRoom(params.id);
       if (response.status === STATUS_RESPONSE.SUCCESS) {
         setRoom(response.data as Room);
       }
@@ -61,7 +61,7 @@ const RoomDetailPage = ({ params }: { params: { id: string } }) => {
             {room.description}
           </p>
         </div>
-        <RoomDetailDropdown room={room} />
+        <RoomActionsDropdown room={room} />
       </div>
       <Separator className="my-6" />
       <div className="flex flex-col space-y-8 lg:flex-row lg:space-x-12 lg:space-y-0">

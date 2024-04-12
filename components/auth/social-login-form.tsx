@@ -2,8 +2,8 @@
 
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
-import { signInWithGoogle } from "@/actions/auth/social";
 import { useToast } from "@/components/ui/use-toast";
+import SocialAuthAction from "@/actions/auth/social";
 
 interface SocialLoginFormProps {
   isPending: boolean;
@@ -12,15 +12,12 @@ interface SocialLoginFormProps {
 const SocialLoginForm = ({ isPending }: SocialLoginFormProps) => {
   const { toast } = useToast();
   const handleSignInWithGoogle = async () => {
-    try {
-      await signInWithGoogle();
-      toast({
-        variant: "success",
-        title: "Successfully signed in with Google.",
-      });
-    } catch (error: any) {
-      console.error("An error occurred while signing in: " + error.code);
-    }
+    const result = await SocialAuthAction.signInWithGoogle();
+    toast({
+      title: result.status === "success" ? "Sign In" : "Error",
+      description: result.message as string,
+      variant: result.status === "success" ? "success" : "destructive",
+    });
   };
 
   return (

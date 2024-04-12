@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { MemberRole, MemberStatus } from "@/types/user";
 
 export const ProfileSchema = z.object({
   name: z
@@ -15,4 +16,10 @@ export const ProfileSchema = z.object({
     })
     .email(),
   image: z.string().url().optional(),
+});
+
+export const MemberSchema = z.object({
+  email: z.string().email(),
+  role: z.enum([MemberRole.HOST, MemberRole.MEMBER]),
+  status: z.enum([MemberStatus.ACTIVE, MemberStatus.INACTIVE]),
 });

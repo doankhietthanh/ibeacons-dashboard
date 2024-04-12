@@ -5,7 +5,7 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { getAuth } from "firebase/auth";
 import { redirect } from "next/navigation";
 import { DEFAULT_REDIRECT_PAGE } from "@/routes";
-import CardWrapper from "@/components/auth/card-wrapper";
+import CardWrapper from "@/components/card-wrapper";
 import { SignInForm } from "@/components/auth/sign-in-form";
 import LoadingFullPage from "@/components/loading-full-page";
 import ErrorFullPage from "@/components/error-full-page";

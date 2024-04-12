@@ -24,13 +24,16 @@ import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { useToast } from "@/components/ui/use-toast";
 import { Icons } from "@/components/icons";
 import { Textarea } from "@/components/ui/textarea";
-import { createRoom } from "@/actions/rooms";
+import RoomAction from "@/actions/rooms";
+import { useRouter } from "next/navigation";
+import { LOCAL_STORAGE_KEY } from "@/constants";
 
 const CreateRoomForm = () => {
   const [backgroundCover, setBackgroundCover] = useState<File | null>(null);
   const [roomMap, setRoomMap] = useState<File | null>(null);
   const [isPending, startTransition] = useTransition();
 
+  const router = useRouter();
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof CreateRoomSchema>>({
@@ -44,12 +47,20 @@ const CreateRoomForm = () => {
 
   const onSubmit = async (values: z.infer<typeof CreateRoomSchema>) => {
     startTransition(async () => {
-      const result = await createRoom(values, backgroundCover, roomMap);
+      const result = await RoomAction.createRoom(
+        values,
+        backgroundCover,
+        roomMap,
+      );
       toast({
         title: result.status === "success" ? "Room created" : "Error",
         description: result.message as string,
         variant: result.status === "success" ? "success" : "destructive",
       });
+      if (result.status === "success") {
+        localStorage.removeItem(LOCAL_STORAGE_KEY.TOTAL_ROOMS);
+        router.push(`/rooms/${values.id}`);
+      }
     });
   };
 
@@ -89,7 +100,7 @@ const CreateRoomForm = () => {
           <FormField
             control={form.control}
             name="backgroundCover"
-            render={({ field }) => (
+            render={() => (
               <FormItem>
                 <FormLabel>Background Cover</FormLabel>
                 <FormDescription>
@@ -152,7 +163,7 @@ const CreateRoomForm = () => {
           <FormField
             control={form.control}
             name="map"
-            render={({ field }) => (
+            render={() => (
               <FormItem>
                 <FormLabel>Room Map</FormLabel>
                 <FormDescription>

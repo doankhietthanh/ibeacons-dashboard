@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useState, useTransition } from "react";
 
 import { Room } from "@/types/room";
@@ -15,7 +17,7 @@ import { AspectRatio } from "@/components/ui/aspect-ratio";
 import Image from "next/image";
 import Link from "next/link";
 import { STATUS_RESPONSE } from "@/constants";
-import { getRooms } from "@/actions/rooms";
+import RoomAction from "@/actions/rooms";
 
 const RoomsGallery = () => {
   const [isPending, startTransition] = useTransition();
@@ -24,7 +26,7 @@ const RoomsGallery = () => {
 
   useEffect(() => {
     startTransition(async () => {
-      const response = await getRooms();
+      const response = await RoomAction.getRooms();
       if (response.status === STATUS_RESPONSE.SUCCESS) {
         setRooms(response.data as Room[]);
       }
@@ -62,7 +64,7 @@ const RoomsGallery = () => {
     <div className="grid h-full w-full grid-cols-1 justify-items-center gap-5 md:grid-cols-2 lg:grid-cols-3">
       {rooms.map((room) => (
         <Link
-          href={`/manager/rooms/${room.id}`}
+          href={`/rooms/${room.id}`}
           key={room.id}
           className="w-full cursor-pointer lg:max-w-[400px]"
         >

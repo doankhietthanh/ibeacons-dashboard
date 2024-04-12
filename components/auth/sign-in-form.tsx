@@ -21,7 +21,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import ErrorAlert from "@/components/error-alert";
-import { signIn } from "@/actions/auth";
+import AuthAction from "@/actions/auth";
 import SocialLoginForm from "@/components/auth/social-login-form";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
@@ -42,17 +42,13 @@ export const SignInForm = ({ className, ...props }: SignInFormProps) => {
   const onSubmit = (values: z.infer<typeof SignInSchema>) => {
     setErrorMessage("");
 
-    startTransition(() => {
-      signIn(values)
-        .then((res) => {
-          toast({
-            variant: "success",
-            title: res.message,
-          });
-        })
-        .catch((err) => {
-          setErrorMessage(err.message);
-        });
+    startTransition(async () => {
+      const result = await AuthAction.signIn(values);
+      toast({
+        title: result.status === "success" ? "Sign In" : "Error",
+        description: result.message as string,
+        variant: result.status === "success" ? "success" : "destructive",
+      });
     });
   };
 

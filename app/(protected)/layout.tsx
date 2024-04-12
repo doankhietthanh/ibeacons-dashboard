@@ -8,8 +8,8 @@ import { getAuth } from "firebase/auth";
 import firebase from "@/lib/firebase";
 import DesktopNav from "@/components/navbar/desktop-nav";
 import {
-  HomeIcon,
-  ReceiptTextIcon,
+  BlocksIcon,
+  LayoutDashboardIcon,
   Settings2Icon,
   SettingsIcon,
 } from "lucide-react";
@@ -29,17 +29,17 @@ const routers: NavbarItemProps[] = [
   {
     title: "Dashboard",
     href: "/",
-    icon: <HomeIcon />,
+    icon: <LayoutDashboardIcon />,
   },
   {
-    title: "Manager",
-    href: "/manager",
+    title: "Rooms",
+    href: "/rooms",
+    icon: <BlocksIcon />,
+  },
+  {
+    title: "Devices",
+    href: "/devices",
     icon: <Settings2Icon />,
-  },
-  {
-    title: "About",
-    href: "/about",
-    icon: <ReceiptTextIcon />,
   },
   {
     title: "Settings",

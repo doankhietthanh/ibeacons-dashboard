@@ -9,23 +9,20 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useAuthState, useSignOut } from "react-firebase-hooks/auth";
+import { useAuthState } from "react-firebase-hooks/auth";
 import { getAuth } from "firebase/auth";
 import firebase from "@/lib/firebase";
-import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
+import LogoutConfirmDialog from "@/components/auth/logout-confirm-dialog";
 
 const auth = getAuth(firebase);
 
 const UserNav = () => {
   const [user] = useAuthState(auth);
-  const [signOut] = useSignOut(auth);
 
   const router = useRouter();
-  const { toast } = useToast();
 
   if (!user) {
     return null;
@@ -63,7 +60,6 @@ const UserNav = () => {
             }}
           >
             Profile
-            <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => {
@@ -71,28 +67,11 @@ const UserNav = () => {
             }}
           >
             Settings
-            <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onClick={async () => {
-            const success = await signOut();
-            if (success) {
-              toast({
-                variant: "success",
-                title: "You have been logged out",
-              });
-            } else {
-              toast({
-                variant: "destructive",
-                title: "Failed to log out",
-              });
-            }
-          }}
-        >
-          Log out
-          <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
+        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+          <LogoutConfirmDialog className="w-full justify-start p-0 font-normal hover:bg-secondary hover:no-underline" />
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

@@ -18,3 +18,8 @@ export enum ERROR_MESSAGE {
   DELETED_FAILED = "Failed to delete. Please try again.",
   GET_FAILED = "Failed to get. Please try again.",
 }
+
+export enum LOCAL_STORAGE_KEY {
+  TOTAL_ROOMS = "total_rooms",
+  TOTAL_DEVICES = "total_devices",
+}

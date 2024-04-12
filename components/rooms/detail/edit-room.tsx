@@ -1,13 +1,12 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import React, { useState, useTransition } from "react";
-import { PencilIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Room } from "@/types/room";
 import {
@@ -27,8 +26,13 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { UpdateRoomSchema } from "@/schemas/room";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { updateRoom } from "@/actions/rooms";
+import RoomAction from "@/actions/rooms";
 import { useToast } from "@/components/ui/use-toast";
+import { MemberRole } from "@/types/user";
+import { getAuth } from "firebase/auth";
+import firebase from "@/lib/firebase";
+
+const auth = getAuth(firebase);
 
 const EditRoom = ({ room }: { room: Room }) => {
   const [isPending, startTransition] = useTransition();
@@ -45,103 +49,123 @@ const EditRoom = ({ room }: { room: Room }) => {
     },
   });
 
+  // check permission if user is the host of the room
+  const user = auth.currentUser;
+  const hostRoomEmail = room.members?.find(
+    (member) => member.role === MemberRole.HOST,
+  )?.email;
+
+  if (!user || user?.email !== hostRoomEmail) {
+    return (
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Access Denied</DialogTitle>
+        </DialogHeader>
+        <div className="text-center">
+          <p>You are not authorized to add members to this room.</p>
+        </div>
+      </DialogContent>
+    );
+  }
+
   const onSubmit = async (values: z.infer<typeof UpdateRoomSchema>) => {
     startTransition(async () => {
-      const result = await updateRoom(room.id, values, backgroundCover);
+      const result = await RoomAction.updateRoom(
+        room.id,
+        values,
+        backgroundCover,
+      );
       toast({
         title: result.status === "success" ? "Room updated" : "Error",
         description: result.message as string,
         variant: result.status === "success" ? "success" : "destructive",
       });
+      if (result.status === "success") {
+        window.location.reload();
+      }
     });
   };
 
   return (
-    <Dialog>
-      <DialogTrigger className="flex w-full items-center">
-        <PencilIcon className="mr-2 h-4 w-4" />
-        <span>Edit room</span>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>Edit room</DialogTitle>
-        </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Name</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Textarea {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="backgroundCover"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Background Cover</FormLabel>
-                  <FormDescription>
-                    <AspectRatio ratio={16 / 9}>
-                      <Image
-                        src={
-                          backgroundCover
-                            ? URL.createObjectURL(backgroundCover)
-                            : room.backgroundCover || ""
-                        }
-                        alt="Image"
-                        className="h-full w-full rounded-md object-cover"
-                        width={0}
-                        height={0}
-                        sizes="100vw"
-                      />
-                    </AspectRatio>
-                  </FormDescription>
-                  <FormControl>
-                    <Input
-                      type="file"
-                      onChange={(event) => {
-                        if (event.target.files) {
-                          setBackgroundCover(event.target.files[0]);
-                        }
-                      }}
+    <DialogContent className="sm:max-w-[425px]">
+      <DialogHeader>
+        <DialogTitle>Edit room</DialogTitle>
+      </DialogHeader>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Name</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Description</FormLabel>
+                <FormControl>
+                  <Textarea {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="backgroundCover"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Background Cover</FormLabel>
+                <FormDescription>
+                  <AspectRatio ratio={16 / 9}>
+                    <Image
+                      src={
+                        backgroundCover
+                          ? URL.createObjectURL(backgroundCover)
+                          : room.backgroundCover || ""
+                      }
+                      alt="Image"
+                      className="h-full w-full rounded-md object-cover"
+                      width={0}
+                      height={0}
+                      sizes="100vw"
                     />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+                  </AspectRatio>
+                </FormDescription>
+                <FormControl>
+                  <Input
+                    type="file"
+                    onChange={(event) => {
+                      if (event.target.files) {
+                        setBackgroundCover(event.target.files[0]);
+                      }
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <div className="mt-2 flex w-full justify-end">
+            <Button disabled={isPending} type="submit">
+              {isPending && (
+                <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
               )}
-            />
-            <div className="mt-2 flex w-full justify-end">
-              <Button disabled={isPending} type="submit">
-                {isPending && (
-                  <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-                )}
-                Save changes
-              </Button>
-            </div>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
+              Save changes
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </DialogContent>
   );
 };
 

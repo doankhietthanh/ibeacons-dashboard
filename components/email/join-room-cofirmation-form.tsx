@@ -1,48 +1,42 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { emailActions } from "@/actions/auth/email-actions";
 import { useSearchParams } from "next/navigation";
 import { BeatLoader } from "react-spinners";
 import ErrorAlert from "@/components/error-alert";
 import SuccessAlert from "@/components/success-alert";
+import RoomAction from "@/actions/rooms";
+import { STATUS_RESPONSE } from "@/constants";
 
-export const EmailVerificationForm = () => {
+const JoinRoomConfirmationForm = () => {
   const [errorMessage, setErrorMessage] = useState<string | undefined>("");
   const [successMessage, setSuccessMessage] = useState<string | undefined>("");
 
   const searchParams = useSearchParams();
-  const mode = searchParams.get("mode");
-  const actionCode = searchParams.get("oobCode");
-  const continueUrl = searchParams.get("continueUrl");
+  const roomId = searchParams.get("roomId");
+  const email = searchParams.get("email");
 
-  const onSubmit = useCallback(() => {
+  const onSubmit = useCallback(async () => {
     if (successMessage || errorMessage) {
       return;
     }
 
-    if (!mode && mode !== "verifyEmail") {
-      setErrorMessage("Missing mode parameter or mode is not verifyEmail");
+    if (!roomId || !email) {
+      setErrorMessage("Missing room id parameter or email is not provided");
       return;
     }
 
-    if (!actionCode) {
-      setErrorMessage("Missing action code parameter");
-      return;
+    const result = await RoomAction.joinRoom(roomId, email);
+    if (result.status === STATUS_RESPONSE.SUCCESS) {
+      setSuccessMessage(result.message as string);
+      localStorage.clear();
+    } else {
+      setErrorMessage(result.message as string);
     }
-
-    emailActions(mode, actionCode, continueUrl)
-      .then((data) => {
-        setSuccessMessage(data.success);
-        setErrorMessage(data.error);
-      })
-      .catch(() => {
-        setErrorMessage("Something went wrong!");
-      });
-  }, [mode, actionCode, continueUrl, errorMessage, successMessage]);
+  }, [roomId, email, errorMessage, successMessage]);
 
   useEffect(() => {
-    onSubmit();
+    onSubmit().then(() => {});
   }, [onSubmit]);
 
   return (
@@ -58,3 +52,5 @@ export const EmailVerificationForm = () => {
     </div>
   );
 };
+
+export default JoinRoomConfirmationForm;

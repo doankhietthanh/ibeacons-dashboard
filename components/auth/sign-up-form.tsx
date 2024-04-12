@@ -21,7 +21,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import ErrorAlert from "@/components/error-alert";
-import { signUp } from "@/actions/auth";
+import AuthAction from "@/actions/auth";
 import { useToast } from "@/components/ui/use-toast";
 
 interface SignUpFormProps extends React.HTMLAttributes<HTMLDivElement> {}
@@ -39,17 +39,13 @@ export const SignUpForm = ({ className, ...props }: SignUpFormProps) => {
   const onSubmit = (values: z.infer<typeof SignUpSchema>) => {
     setErrorMessage("");
 
-    startTransition(() => {
-      signUp(values)
-        .then((res) => {
-          toast({
-            variant: "success",
-            title: res.message,
-          });
-        })
-        .catch((err) => {
-          setErrorMessage(err.message);
-        });
+    startTransition(async () => {
+      const result = await AuthAction.signUp(values);
+      toast({
+        title: result.status === "success" ? "Sign Up" : "Error",
+        description: result.message as string,
+        variant: result.status === "success" ? "success" : "destructive",
+      });
     });
   };
 

@@ -2,6 +2,7 @@ import React from "react";
 
 import { Separator } from "@/components/ui/separator";
 import SettingsNav from "@/components/settings/settings-nav";
+import LogoutConfirmDialog from "@/components/auth/logout-confirm-dialog";
 
 const sidebarNavItems = [
   {
@@ -11,6 +12,10 @@ const sidebarNavItems = [
   {
     title: "Profile",
     href: "/settings/profile",
+  },
+  {
+    title: "About",
+    href: "/about",
   },
 ];
 
@@ -32,6 +37,7 @@ const SettingsLayout = ({ children }: SettingsLayoutProps) => {
         <div className="flex flex-col space-y-8 lg:flex-row lg:space-x-12 lg:space-y-0">
           <aside className="lg:w-1/5">
             <SettingsNav items={sidebarNavItems} />
+            <LogoutConfirmDialog />
           </aside>
           <div className="flex-1 lg:max-w-2xl">{children}</div>
         </div>
