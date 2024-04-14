@@ -21,6 +21,7 @@ import { doc, getDoc, getFirestore } from "firebase/firestore";
 import { Collections } from "@/types/collections";
 import { ERROR_MESSAGE, STATUS_RESPONSE, SUCCESS_MESSAGE } from "@/constants";
 import { MemberRole, MemberStatus } from "@/types/user";
+import { convertUndefinedToNull } from "@/common";
 
 const auth = getAuth(firebase);
 const storage = getStorage(firebase);
@@ -46,9 +47,20 @@ const RoomAction = {
           message: ERROR_MESSAGE.GET_FAILED,
         };
       }
+      // Check if user has permission in room
+      const room = roomSnap.data() as Room;
+      const member = room.members?.find(
+        (member) => member.email === user.email,
+      );
+      if (!member) {
+        return {
+          status: STATUS_RESPONSE.ERROR,
+          message: ERROR_MESSAGE.PERMISSION_DENIED,
+        };
+      }
       return {
         status: STATUS_RESPONSE.SUCCESS,
-        data: roomSnap.data() as Room,
+        data: room,
       };
     } catch (error) {
       console.error(error);
@@ -70,7 +82,7 @@ const RoomAction = {
         };
       }
       // Get rooms
-      let rooms: Room[] = [];
+      let rooms: Room[];
       const roomsRef = collection(db, Collections.ROOMS);
       // Get rooms where user is a host
       const roomsQuery = query(
@@ -150,7 +162,7 @@ const RoomAction = {
             status: MemberStatus.ACTIVE,
           },
         ],
-        ...room,
+        ...convertUndefinedToNull(room),
         ...getUserCreatedInfo(user),
       };
       // Create room
@@ -192,7 +204,7 @@ const RoomAction = {
         room.backgroundCover = await getDownloadURL(storageRef);
       }
       // Add user created info
-      room = { ...room, ...getUserUpdatedInfo(user) };
+      room = { ...convertUndefinedToNull(room), ...getUserUpdatedInfo(user) };
       // Update room
       await updateDoc(doc(db, Collections.ROOMS, id), { ...room });
       return {

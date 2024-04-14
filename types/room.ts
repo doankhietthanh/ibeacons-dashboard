@@ -1,4 +1,5 @@
 import { Member } from "@/types/user";
+import { Device } from "@/types/devices";
 
 export interface Room {
   id: string;
@@ -11,7 +12,7 @@ export interface Room {
   width?: number;
   height?: number;
   stations?: string[];
-  devices?: string[];
+  devices?: Device[];
 
   createdBy?: string;
   updatedBy?: string;
@@ -29,7 +30,7 @@ export interface RoomUpdate {
   // width?: number;
   // height?: number;
   stations?: string[];
-  devices?: string[];
+  devices?: Device[];
 
   createdBy?: string;
   updatedBy?: string;

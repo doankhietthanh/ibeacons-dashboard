@@ -122,7 +122,7 @@ const EditRoom = ({ room }: { room: Room }) => {
           <FormField
             control={form.control}
             name="backgroundCover"
-            render={({ field }) => (
+            render={() => (
               <FormItem>
                 <FormLabel>Background Cover</FormLabel>
                 <FormDescription>

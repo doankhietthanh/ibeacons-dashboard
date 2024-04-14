@@ -23,7 +23,7 @@ const ItemsSummary = () => {
         setTotalRooms(rooms);
         localStorage.setItem(LOCAL_STORAGE_KEY.TOTAL_ROOMS, rooms.toString());
       }
-      // Fetch total devices
+      // Fetch total devices.ts
       let devices: string | number | null = localStorage.getItem(
         LOCAL_STORAGE_KEY.TOTAL_DEVICES,
       );

@@ -27,9 +27,7 @@ const AddDevices = ({ room }: { room: Room }) => {
 
   const form = useForm<z.infer<typeof UpdateRoomSchema>>({
     resolver: zodResolver(UpdateRoomSchema),
-    defaultValues: {
-      devices: room.devices,
-    },
+    defaultValues: {},
   });
 
   // check permission if user is the host of the room
@@ -68,7 +66,7 @@ const AddDevices = ({ room }: { room: Room }) => {
         <DialogTitle>Add devices</DialogTitle>
       </DialogHeader>
       <Form {...form}>
-        {/* TODO: Add input add devices*/}
+        {/* TODO: Add input add devices.ts*/}
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <div className="mt-2 flex w-full justify-end">
             <Button disabled={isPending} type="submit">

@@ -23,7 +23,6 @@ import {
 import ErrorAlert from "@/components/error-alert";
 import AuthAction from "@/actions/auth";
 import SocialLoginForm from "@/components/auth/social-login-form";
-import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
 
 interface SignInFormProps extends React.HTMLAttributes<HTMLDivElement> {}
@@ -32,7 +31,6 @@ export const SignInForm = ({ className, ...props }: SignInFormProps) => {
   const [isPending, startTransition] = useTransition();
   const [errorMessage, setErrorMessage] = useState<string | undefined>("");
 
-  const router = useRouter();
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof SignInSchema>>({

@@ -2,7 +2,7 @@ export const siteConfig = {
   name: "iBeacons",
   url: "https://ui.shadcn.com",
   ogImage: "https://ui.shadcn.com/og.jpg",
-  title: "iBeacons rooms",
+  title: "iBeacons",
   description: "iBeacons rooms - Manage your iBeacons and monitor their status",
 };
 

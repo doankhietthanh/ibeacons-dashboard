@@ -13,8 +13,6 @@ export const CreateRoomSchema = z.object({
   map: z.string().url().optional(),
   width: z.coerce.number().min(0).optional(),
   height: z.coerce.number().min(0).optional(),
-  stations: z.array(z.string().uuid()).optional(),
-  devices: z.array(z.string().uuid()).optional(),
 });
 
 export const UpdateRoomSchema = z.object({
@@ -24,10 +22,4 @@ export const UpdateRoomSchema = z.object({
   description: z.string().optional(),
   backgroundCover: z.string().url().optional(),
   members: z.array(MemberSchema).optional(),
-
-  // map: z.string().url().optional(),
-  // width: z.coerce.number().min(0).optional(),
-  // height: z.coerce.number().min(0).optional(),
-  stations: z.array(z.string().uuid()).optional(),
-  devices: z.array(z.string().uuid()).optional(),
 });

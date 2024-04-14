@@ -17,6 +17,7 @@ export enum ERROR_MESSAGE {
   UPDATED_FAILED = "Failed to update. Please try again.",
   DELETED_FAILED = "Failed to delete. Please try again.",
   GET_FAILED = "Failed to get. Please try again.",
+  PERMISSION_DENIED = "Permission denied.",
 }
 
 export enum LOCAL_STORAGE_KEY {
