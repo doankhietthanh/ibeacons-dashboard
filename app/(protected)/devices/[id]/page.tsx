@@ -5,23 +5,23 @@ import React, { useEffect, useState, useTransition } from "react";
 import { Separator } from "@/components/ui/separator";
 import Loader from "@/components/loader";
 import ErrorAlert from "@/components/error-alert";
-import { Room } from "@/types/room";
-import Image from "next/image";
-import { RoomAction } from "@/actions/rooms";
 import { STATUS_RESPONSE } from "@/constants";
-import RoomActionsDropdown from "@/components/rooms/detail/room-actions-dropdown";
+import { Device } from "@/types/devices";
+import { DeviceAction } from "@/actions/devices";
+import DeviceController from "@/components/devices/detail/device-controller";
+import DeviceActionsDropdown from "@/components/devices/detail/device-action-dropdown";
 
-const RoomDetailPage = ({ params }: { params: { id: string } }) => {
+const DeviceDetailPage = ({ params }: { params: { id: string } }) => {
   const [isPending, startTransition] = useTransition();
-  const [room, setRoom] = useState<Room | null>(null);
+  const [device, setDevice] = useState<Device | null>(null);
   const [error, setError] = useState<any>(null);
 
   useEffect(() => {
     startTransition(async () => {
-      const roomAction = new RoomAction();
-      const response = await roomAction.getRoom(params.id);
+      const deviceAction = new DeviceAction();
+      const response = await deviceAction.getDevice(params.id);
       if (response.status === STATUS_RESPONSE.SUCCESS) {
-        setRoom(response.data as Room);
+        setDevice(response.data as Device);
       }
       if (response.status === STATUS_RESPONSE.ERROR) {
         setError(response);
@@ -45,7 +45,7 @@ const RoomDetailPage = ({ params }: { params: { id: string } }) => {
     );
   }
 
-  if (!room) {
+  if (!device) {
     return (
       <div className="flex h-full w-full items-center justify-center">
         <ErrorAlert message="Room not found." />
@@ -57,26 +57,19 @@ const RoomDetailPage = ({ params }: { params: { id: string } }) => {
     <div className="block space-y-6 py-5 md:container md:p-10">
       <div className="flex items-center justify-between gap-2 sm:flex-row">
         <div className="space-y-0.5">
-          <h2 className="text-2xl font-bold tracking-tight">{room.name}</h2>
+          <h2 className="text-2xl font-bold tracking-tight">{device.name}</h2>
           <p className="hidden text-muted-foreground md:block">
-            {room.description}
+            ID: {device.id}
           </p>
         </div>
-        <RoomActionsDropdown room={room} />
+        <DeviceActionsDropdown device={device} />
       </div>
       <Separator className="my-6" />
       <div className="flex flex-col space-y-8 lg:flex-row lg:space-x-12 lg:space-y-0">
-        <Image
-          src={room.map || ""}
-          alt="map"
-          width={0}
-          height={0}
-          className="h-atuo w-full"
-          sizes="100vw"
-        />
+        <DeviceController device={device} />
       </div>
     </div>
   );
 };
 
-export default RoomDetailPage;
+export default DeviceDetailPage;

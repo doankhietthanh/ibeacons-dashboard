@@ -20,7 +20,8 @@ const DevicesPage = () => {
 
   useEffect(() => {
     startTransition(async () => {
-      const response = await DeviceAction.getDevices();
+      const deviceAction = new DeviceAction();
+      const response = await deviceAction.getDevices();
       if (response.status === STATUS_RESPONSE.SUCCESS) {
         setDevices(response.data as Device[]);
       }

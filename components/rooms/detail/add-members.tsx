@@ -13,7 +13,7 @@ import { PlusIcon, TrashIcon } from "lucide-react";
 import { Icons } from "@/components/icons";
 import { Member, MemberRole, MemberStatus } from "@/types/user";
 import { Badge } from "@/components/ui/badge";
-import RoomAction from "@/actions/rooms";
+import { RoomAction } from "@/actions/rooms";
 import firebase from "@/lib/firebase";
 import { getAuth } from "firebase/auth";
 import { sendEmailJoinRoomConfirm } from "@/lib/mail";
@@ -50,7 +50,8 @@ const AddMembers = ({ room }: { room: Room }) => {
   const onSubmit = async () => {
     await sendConfirmationEmail();
     startTransition(async () => {
-      const result = await RoomAction.updateRoom(room.id, {
+      const roomAction = new RoomAction();
+      const result = await roomAction.updateRoom(room.id, {
         members,
       });
       toast({

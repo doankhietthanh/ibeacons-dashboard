@@ -27,8 +27,8 @@ const auth = getAuth(firebase);
 const storage = getStorage(firebase);
 const db = getFirestore(firebase);
 
-const RoomAction = {
-  getRoom: async (id: string) => {
+export class RoomAction {
+  getRoom = async (id: string) => {
     try {
       // Check if user is authenticated
       const user = auth.currentUser;
@@ -69,9 +69,9 @@ const RoomAction = {
         message: error || ERROR_MESSAGE.GET_FAILED,
       };
     }
-  },
+  };
 
-  getRooms: async () => {
+  getRooms = async () => {
     try {
       // Check if user is authenticated
       const user = auth.currentUser;
@@ -118,9 +118,9 @@ const RoomAction = {
         message: error || ERROR_MESSAGE.GET_FAILED,
       };
     }
-  },
+  };
 
-  createRoom: async (
+  createRoom = async (
     room: Room,
     backgroundCover?: File | null,
     map?: File | null,
@@ -178,9 +178,9 @@ const RoomAction = {
         message: error || ERROR_MESSAGE.CREATED_FAILED,
       };
     }
-  },
+  };
 
-  updateRoom: async (
+  updateRoom = async (
     id: string,
     room: RoomUpdate,
     backgroundCover?: File | null,
@@ -203,7 +203,7 @@ const RoomAction = {
         console.log("Upload image");
         room.backgroundCover = await getDownloadURL(storageRef);
       }
-      // Add user created info
+      // Add user update info
       room = { ...convertUndefinedToNull(room), ...getUserUpdatedInfo(user) };
       // Update room
       await updateDoc(doc(db, Collections.ROOMS, id), { ...room });
@@ -218,16 +218,16 @@ const RoomAction = {
         message: error || ERROR_MESSAGE.UPDATED_FAILED,
       };
     }
-  },
+  };
 
-  deleteRoom: async (id: string) => {
+  deleteRoom = async (id: string) => {
     try {
-      // Check if user is authenticated
-      const user = auth.currentUser;
-      if (!user) {
+      // Get room
+      const room = await this.getRoom(id);
+      if (room.status === STATUS_RESPONSE.ERROR) {
         return {
-          status: STATUS_RESPONSE.SUCCESS,
-          message: ERROR_MESSAGE.USER_NOT_FOUND,
+          status: STATUS_RESPONSE.ERROR,
+          message: room.message,
         };
       }
       // Delete room
@@ -243,13 +243,12 @@ const RoomAction = {
         message: error || ERROR_MESSAGE.DELETED_FAILED,
       };
     }
-  },
+  };
 
-  joinRoom: async (roomId: string, email: string) => {
+  joinRoom = async (roomId: string, email: string) => {
     try {
       // Check if user is authenticated
       const user = auth.currentUser;
-      console.log("user", user);
       // Check current user is not the same as the email
       if (!user || user.email !== email) {
         return {
@@ -285,7 +284,5 @@ const RoomAction = {
         message: error || ERROR_MESSAGE.UPDATED_FAILED,
       };
     }
-  },
-};
-
-export default RoomAction;
+  };
+}

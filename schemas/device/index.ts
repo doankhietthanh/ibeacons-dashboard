@@ -10,3 +10,14 @@ export const CreateDeviceSchema = z.object({
   description: z.string().optional(),
   room: z.string().uuid().optional(),
 });
+
+export const UpdateDeviceSchema = z.object({
+  name: z
+    .string()
+    .min(1, {
+      message: "Name is required.",
+    })
+    .optional(),
+  description: z.string().optional(),
+  room: z.string().uuid().optional(),
+});

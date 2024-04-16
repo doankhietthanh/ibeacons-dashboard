@@ -17,7 +17,7 @@ import { AspectRatio } from "@/components/ui/aspect-ratio";
 import Image from "next/image";
 import Link from "next/link";
 import { STATUS_RESPONSE } from "@/constants";
-import RoomAction from "@/actions/rooms";
+import { RoomAction } from "@/actions/rooms";
 
 const RoomsGallery = () => {
   const [isPending, startTransition] = useTransition();
@@ -26,7 +26,8 @@ const RoomsGallery = () => {
 
   useEffect(() => {
     startTransition(async () => {
-      const response = await RoomAction.getRooms();
+      const roomAction = new RoomAction();
+      const response = await roomAction.getRooms();
       if (response.status === STATUS_RESPONSE.SUCCESS) {
         setRooms(response.data as Room[]);
       }

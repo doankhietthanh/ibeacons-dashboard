@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useTransition } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BlocksIcon, Settings2Icon } from "lucide-react";
-import MetricsAction from "@/actions/metrics";
+import { MetricsAction } from "@/actions/metrics";
 import { Icons } from "@/components/icons";
 import { LOCAL_STORAGE_KEY } from "@/constants";
 
@@ -11,6 +11,7 @@ const ItemsSummary = () => {
   const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
+    const metricsAction = new MetricsAction();
     startTransition(async () => {
       // Fetch total rooms
       let rooms: string | number | null = localStorage.getItem(
@@ -19,7 +20,7 @@ const ItemsSummary = () => {
       if (rooms) {
         setTotalRooms(parseInt(rooms));
       } else {
-        rooms = await MetricsAction.getTotalRooms();
+        rooms = await metricsAction.getTotalRooms();
         setTotalRooms(rooms);
         localStorage.setItem(LOCAL_STORAGE_KEY.TOTAL_ROOMS, rooms.toString());
       }
@@ -30,7 +31,7 @@ const ItemsSummary = () => {
       if (devices) {
         setTotalDevices(parseInt(devices));
       } else {
-        devices = await MetricsAction.getTotalDevices();
+        devices = await metricsAction.getTotalDevices();
         setTotalDevices(devices);
         localStorage.setItem(
           LOCAL_STORAGE_KEY.TOTAL_DEVICES,

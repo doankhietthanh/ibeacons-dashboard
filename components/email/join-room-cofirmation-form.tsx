@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { BeatLoader } from "react-spinners";
 import ErrorAlert from "@/components/error-alert";
 import SuccessAlert from "@/components/success-alert";
-import RoomAction from "@/actions/rooms";
+import { RoomAction } from "@/actions/rooms";
 import { STATUS_RESPONSE } from "@/constants";
 
 const JoinRoomConfirmationForm = () => {
@@ -25,8 +25,9 @@ const JoinRoomConfirmationForm = () => {
       setErrorMessage("Missing room id parameter or email is not provided");
       return;
     }
-
-    const result = await RoomAction.joinRoom(roomId, email);
+    
+    const roomAction = new RoomAction();
+    const result = await roomAction.joinRoom(roomId, email);
     if (result.status === STATUS_RESPONSE.SUCCESS) {
       setSuccessMessage(result.message as string);
       localStorage.clear();

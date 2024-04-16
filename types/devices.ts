@@ -20,6 +20,16 @@ export interface DeviceCreate {
   updatedAt?: Date;
 }
 
+export interface DeviceUpdate {
+  name?: string;
+  description?: string;
+  room?: string;
+  createdBy?: string;
+  updatedBy?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
 export interface Device {
   id: string;
   name: string;

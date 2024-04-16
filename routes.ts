@@ -4,4 +4,5 @@ export const SIGN_UP_PAGE: string = "/auth/sign-up";
 
 export const SIGN_IN_PAGE: string = "/auth/sign-in";
 
-export const BACK_TO_ROOMS_GALLERY: string = "/";
+export const BACK_TO_ROOMS_PAGE: string = "/rooms";
+export const BACK_TO_DEVICES_PAGE: string = "/devices";

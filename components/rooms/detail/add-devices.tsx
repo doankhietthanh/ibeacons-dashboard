@@ -12,7 +12,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { UpdateRoomSchema } from "@/schemas/room";
 import { zodResolver } from "@hookform/resolvers/zod";
-import RoomAction from "@/actions/rooms";
+import { RoomAction } from "@/actions/rooms";
 import { useToast } from "@/components/ui/use-toast";
 import { MemberRole } from "@/types/user";
 import { getAuth } from "firebase/auth";
@@ -51,7 +51,8 @@ const AddDevices = ({ room }: { room: Room }) => {
 
   const onSubmit = async (values: z.infer<typeof UpdateRoomSchema>) => {
     startTransition(async () => {
-      const result = await RoomAction.updateRoom(room.id, values);
+      const roomAction = new RoomAction();
+      const result = await roomAction.updateRoom(room.id, values);
       toast({
         title: result.status === "success" ? "Room updated" : "Error",
         description: result.message as string,

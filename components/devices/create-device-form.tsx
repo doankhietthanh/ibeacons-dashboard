@@ -30,7 +30,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
 import { CreateDeviceSchema } from "@/schemas/device";
 import { Room } from "@/types/room";
-import RoomAction from "@/actions/rooms";
+import { RoomAction } from "@/actions/rooms";
 import { LOCAL_STORAGE_KEY, STATUS_RESPONSE } from "@/constants";
 import { DeviceTypes } from "@/components/devices/device-types";
 import { DeviceAction } from "@/actions/devices";
@@ -50,9 +50,9 @@ const CreateDeviceForm = () => {
   });
 
   const onSubmit = async (values: z.infer<typeof CreateDeviceSchema>) => {
-    console.log(values);
     startTransition(async () => {
-      const result = await DeviceAction.createDevice(values);
+      const deviceAction = new DeviceAction();
+      const result = await deviceAction.createDevice(values);
       toast({
         title: result.status === "success" ? "Device created" : "Error",
         description: result.message as string,
@@ -66,7 +66,8 @@ const CreateDeviceForm = () => {
   };
 
   useEffect(() => {
-    RoomAction.getRooms().then((result) => {
+    const roomAction = new RoomAction();
+    roomAction.getRooms().then((result) => {
       if (result.status == STATUS_RESPONSE.SUCCESS) {
         setRooms(result.data);
       }

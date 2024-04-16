@@ -1,4 +1,3 @@
-import { Room } from "@/types/room";
 import {
   DialogClose,
   DialogContent,
@@ -9,38 +8,36 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import React, { useTransition } from "react";
-import { RoomAction } from "@/actions/rooms";
 import { useToast } from "@/components/ui/use-toast";
 import { Icons } from "@/components/icons";
 import { useRouter } from "next/navigation";
+import { BACK_TO_DEVICES_PAGE } from "@/routes";
 import { LOCAL_STORAGE_KEY } from "@/constants";
-import { MemberRole } from "@/types/user";
 import { getAuth } from "firebase/auth";
 import firebase from "@/lib/firebase";
-import { BACK_TO_ROOMS_PAGE } from "@/routes";
+import { Device } from "@/types/devices";
+import { DeviceAction } from "@/actions/devices";
 
 const auth = getAuth(firebase);
 
-const DeleteRoom = ({ room }: { room: Room }) => {
+const DeleteDevice = ({ device }: { device: Device }) => {
   const [isPending, startTransition] = useTransition();
 
   const router = useRouter();
   const { toast } = useToast();
 
-  // check permission if user is the host of the room
+  // check permission if user is created the device
   const user = auth.currentUser;
-  const hostRoomEmail = room.members?.find(
-    (member) => member.role === MemberRole.HOST,
-  )?.email;
+  const userCreatedDevice = device.createdBy;
 
-  if (!user || user?.email !== hostRoomEmail) {
+  if (!user || user?.uid !== userCreatedDevice) {
     return (
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Access Denied</DialogTitle>
         </DialogHeader>
         <div className="text-center">
-          <p>You are not authorized to add members to this room.</p>
+          <p>You are not authorized to delete this device.</p>
         </div>
       </DialogContent>
     );
@@ -48,16 +45,16 @@ const DeleteRoom = ({ room }: { room: Room }) => {
 
   const onSubmit = async () => {
     startTransition(async () => {
-      const roomAction = new RoomAction();
-      const result = await roomAction.deleteRoom(room.id);
+      const deviceAction = new DeviceAction();
+      const result = await deviceAction.deleteDevice(device.id);
       toast({
-        title: result.status === "success" ? "Room deleted" : "Error",
+        title: result.status === "success" ? "Device deleted" : "Error",
         description: result.message as string,
         variant: result.status === "success" ? "success" : "destructive",
       });
       if (result.status === "success") {
-        localStorage.removeItem(LOCAL_STORAGE_KEY.TOTAL_ROOMS);
-        router.push(BACK_TO_ROOMS_PAGE);
+        localStorage.removeItem(LOCAL_STORAGE_KEY.TOTAL_DEVICES);
+        router.push(BACK_TO_DEVICES_PAGE);
       }
     });
   };
@@ -65,9 +62,9 @@ const DeleteRoom = ({ room }: { room: Room }) => {
   return (
     <DialogContent>
       <DialogHeader>
-        <DialogTitle>Are you delete room?</DialogTitle>
+        <DialogTitle>Are you delete device?</DialogTitle>
         <DialogDescription>
-          This action cannot be undone. This will permanently delete the room
+          This action cannot be undone. This will permanently delete the device
           and all its data.
         </DialogDescription>
       </DialogHeader>
@@ -90,4 +87,4 @@ const DeleteRoom = ({ room }: { room: Room }) => {
   );
 };
 
-export default DeleteRoom;
+export default DeleteDevice;

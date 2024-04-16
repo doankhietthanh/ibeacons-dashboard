@@ -6,78 +6,66 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import React, { useState, useTransition } from "react";
+import React, { useTransition } from "react";
 import { Input } from "@/components/ui/input";
-import { Room } from "@/types/room";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
-import Image from "next/image";
 import { Icons } from "@/components/icons";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { UpdateRoomSchema } from "@/schemas/room";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { RoomAction } from "@/actions/rooms";
 import { useToast } from "@/components/ui/use-toast";
-import { MemberRole } from "@/types/user";
 import { getAuth } from "firebase/auth";
 import firebase from "@/lib/firebase";
+import { UpdateDeviceSchema } from "@/schemas/device";
+import { Device } from "@/types/devices";
+import { DeviceAction } from "@/actions/devices";
 
 const auth = getAuth(firebase);
 
-const EditRoom = ({ room }: { room: Room }) => {
+const EditDevice = ({ device }: { device: Device }) => {
   const [isPending, startTransition] = useTransition();
-  const [backgroundCover, setBackgroundCover] = useState<File | null>(null);
 
   const { toast } = useToast();
 
-  const form = useForm<z.infer<typeof UpdateRoomSchema>>({
-    resolver: zodResolver(UpdateRoomSchema),
+  const form = useForm<z.infer<typeof UpdateDeviceSchema>>({
+    resolver: zodResolver(UpdateDeviceSchema),
     defaultValues: {
-      name: room.name,
-      description: room.description,
-      backgroundCover: room.backgroundCover,
+      name: device.name,
+      description: device.description,
     },
   });
 
-  // check permission if user is the host of the room
+  // check permission if user is created the device
   const user = auth.currentUser;
-  const hostRoomEmail = room.members?.find(
-    (member) => member.role === MemberRole.HOST,
-  )?.email;
+  const userCreatedDevice = device.createdBy;
 
-  if (!user || user?.email !== hostRoomEmail) {
+  if (!user || user?.uid !== userCreatedDevice) {
     return (
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Access Denied</DialogTitle>
         </DialogHeader>
         <div className="text-center">
-          <p>You are not authorized to add members to this room.</p>
+          <p>You are not authorized to edit this device.</p>
         </div>
       </DialogContent>
     );
   }
 
-  const onSubmit = async (values: z.infer<typeof UpdateRoomSchema>) => {
+  const onSubmit = async (values: z.infer<typeof UpdateDeviceSchema>) => {
     startTransition(async () => {
-      const roomAction = new RoomAction();
-      const result = await roomAction.updateRoom(
-        room.id,
-        values,
-        backgroundCover,
-      );
+      const deviceAction = new DeviceAction();
+      const result = await deviceAction.updateDevice(device.id, values);
       toast({
-        title: result.status === "success" ? "Room updated" : "Error",
+        title: result.status === "success" ? "Device updated" : "Error",
         description: result.message as string,
         variant: result.status === "success" ? "success" : "destructive",
       });
@@ -90,7 +78,7 @@ const EditRoom = ({ room }: { room: Room }) => {
   return (
     <DialogContent className="sm:max-w-[425px]">
       <DialogHeader>
-        <DialogTitle>Edit room</DialogTitle>
+        <DialogTitle>Edit device</DialogTitle>
       </DialogHeader>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -120,42 +108,7 @@ const EditRoom = ({ room }: { room: Room }) => {
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="backgroundCover"
-            render={() => (
-              <FormItem>
-                <FormLabel>Background Cover</FormLabel>
-                <FormDescription>
-                  <AspectRatio ratio={16 / 9}>
-                    <Image
-                      src={
-                        backgroundCover
-                          ? URL.createObjectURL(backgroundCover)
-                          : room.backgroundCover || ""
-                      }
-                      alt="Image"
-                      className="h-full w-full rounded-md object-cover"
-                      width={0}
-                      height={0}
-                      sizes="100vw"
-                    />
-                  </AspectRatio>
-                </FormDescription>
-                <FormControl>
-                  <Input
-                    type="file"
-                    onChange={(event) => {
-                      if (event.target.files) {
-                        setBackgroundCover(event.target.files[0]);
-                      }
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+
           <div className="mt-2 flex w-full justify-end">
             <Button disabled={isPending} type="submit">
               {isPending && (
@@ -170,4 +123,4 @@ const EditRoom = ({ room }: { room: Room }) => {
   );
 };
 
-export default EditRoom;
+export default EditDevice;

@@ -24,7 +24,7 @@ import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { useToast } from "@/components/ui/use-toast";
 import { Icons } from "@/components/icons";
 import { Textarea } from "@/components/ui/textarea";
-import RoomAction from "@/actions/rooms";
+import { RoomAction } from "@/actions/rooms";
 import { useRouter } from "next/navigation";
 import { LOCAL_STORAGE_KEY } from "@/constants";
 
@@ -47,7 +47,8 @@ const CreateRoomForm = () => {
 
   const onSubmit = async (values: z.infer<typeof CreateRoomSchema>) => {
     startTransition(async () => {
-      const result = await RoomAction.createRoom(
+      const roomAction = new RoomAction();
+      const result = await roomAction.createRoom(
         values,
         backgroundCover,
         roomMap,
