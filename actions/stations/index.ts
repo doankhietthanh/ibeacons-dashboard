@@ -2,7 +2,6 @@ import { getAuth } from "firebase/auth";
 import firebase from "@/lib/firebase";
 import { doc, getDoc, getFirestore } from "firebase/firestore";
 import { ERROR_MESSAGE, STATUS_RESPONSE, SUCCESS_MESSAGE } from "@/constants";
-import { Device, DeviceCreate, DeviceUpdate } from "@/types/devices";
 import { RoomAction } from "@/actions/rooms";
 import { getUserCreatedInfo, getUserUpdatedInfo } from "@/common/user";
 import {
@@ -16,15 +15,16 @@ import {
 } from "@firebase/firestore";
 import { Collections } from "@/types/collections";
 import { convertUndefinedToNull } from "@/common";
+import { Station, StationCreate, StationUpdate } from "@/types/stations";
 import { Room } from "@/types/room";
 
 const auth = getAuth(firebase);
 const db = getFirestore(firebase);
 
-export class DeviceAction {
+export class StationAction {
   private readonly roomAction = new RoomAction();
 
-  getDevices = async () => {
+  getStations = async () => {
     try {
       // Check if user is authenticated
       const user = auth.currentUser;
@@ -34,30 +34,30 @@ export class DeviceAction {
           message: ERROR_MESSAGE.USER_NOT_FOUND,
         };
       }
-      let devices: Device[] = [];
-      // get devices has no room and createdBy is user
-      const deviceQueryNoRoom = query(
-        collection(db, Collections.DEVICES),
+      let stations: Station[] = [];
+      // get stations has no room and createdBy is user
+      const stationQueryNoRoom = query(
+        collection(db, Collections.STATIONS),
         where("room", "==", null),
         where("createdBy", "==", user.uid),
       );
-      const deviceNoRoomSnap = await getDocs(deviceQueryNoRoom);
-      deviceNoRoomSnap.forEach((doc) => {
-        devices.push(doc.data() as Device);
+      const stationNoRoomSnap = await getDocs(stationQueryNoRoom);
+      stationNoRoomSnap.forEach((doc) => {
+        stations.push(doc.data() as Station);
       });
-      // get devices has room
+      // get stations has room
       const rooms = await this.roomAction.getRooms();
       if (rooms.status === STATUS_RESPONSE.SUCCESS) {
         rooms.data?.forEach((room) => {
-          room.devices?.forEach((device) => {
-            devices.push({ ...device, room: room });
+          room.stations?.forEach((station) => {
+            stations.push({ ...station, room: room });
           });
         });
       }
 
       return {
         status: STATUS_RESPONSE.SUCCESS,
-        data: devices,
+        data: stations,
       };
     } catch (error) {
       console.error(error);
@@ -68,7 +68,7 @@ export class DeviceAction {
     }
   };
 
-  getDevice = async (id: string) => {
+  async getStation(id: string) {
     try {
       // Check if user is authenticated
       const user = auth.currentUser;
@@ -78,31 +78,31 @@ export class DeviceAction {
           message: ERROR_MESSAGE.USER_NOT_FOUND,
         };
       }
-      // Get device
-      const deviceDoc = doc(db, Collections.DEVICES, id);
-      const deviceSnap = await getDoc(deviceDoc);
-      if (!deviceSnap.exists()) {
+      // Get station
+      const stationDoc = doc(db, Collections.STATIONS, id);
+      const stationSnap = await getDoc(stationDoc);
+      if (!stationSnap.exists()) {
         return {
           status: STATUS_RESPONSE.ERROR,
           message: ERROR_MESSAGE.GET_FAILED,
         };
       }
-      const device = deviceSnap.data() as Device;
+      const station = stationSnap.data() as Station;
       // Check if user has permission in room
-      if (device.room) {
-        const room = await this.roomAction.getRoom(device.room as string);
+      if (station.room) {
+        const room = await this.roomAction.getRoom(station.room as string);
         if (room.status === STATUS_RESPONSE.ERROR) {
           return {
             status: STATUS_RESPONSE.ERROR,
             message: room.message,
           };
         }
-        // Update device with room info
-        device.room = room.data;
+        // Update station with room info
+        station.room = room.data;
       }
       return {
         status: STATUS_RESPONSE.SUCCESS,
-        data: device,
+        data: station,
       };
     } catch (error) {
       console.error(error);
@@ -111,9 +111,9 @@ export class DeviceAction {
         message: error || ERROR_MESSAGE.GET_FAILED,
       };
     }
-  };
+  }
 
-  createDevice = async (device: DeviceCreate) => {
+  createStation = async (station: StationCreate) => {
     try {
       // Check if user is authenticated
       const user = auth.currentUser;
@@ -125,8 +125,8 @@ export class DeviceAction {
       }
       // Check user has permission in room
       let room;
-      if (device.room) {
-        room = await this.roomAction.getRoom(device.room);
+      if (station.room) {
+        room = await this.roomAction.getRoom(station.room);
         if (room.status === STATUS_RESPONSE.ERROR) {
           return {
             status: STATUS_RESPONSE.ERROR,
@@ -135,20 +135,20 @@ export class DeviceAction {
         }
       }
       // Add user created info
-      device = {
-        ...convertUndefinedToNull(device),
+      station = {
+        ...convertUndefinedToNull(station),
         ...getUserCreatedInfo(user),
       };
       // Create room
-      await setDoc(doc(db, Collections.DEVICES, device.id), device);
-      // Update devices in room
+      await setDoc(doc(db, Collections.STATIONS, station.id), station);
+      // Update stations in room
       if (room?.data) {
-        // Update device in room
+        // Update station in room
         await this.roomAction.updateRoom(room.data?.id, {
           ...room.data,
-          devices: [
-            ...(room.data?.devices ? (room.data.devices as Device[]) : []),
-            device,
+          stations: [
+            ...(room.data.stations ? (room.data?.stations as Station[]) : []),
+            station,
           ],
         });
       }
@@ -165,19 +165,19 @@ export class DeviceAction {
     }
   };
 
-  updateDevice = async (id: string, device: DeviceUpdate) => {
+  updateStation = async (id: string, station: StationUpdate) => {
     try {
-      // Get device
-      const deviceDb = await this.getDevice(id);
-      if (deviceDb.status === STATUS_RESPONSE.ERROR) {
+      // Get station
+      const stationDb = await this.getStation(id);
+      if (stationDb.status === STATUS_RESPONSE.ERROR) {
         return {
           status: STATUS_RESPONSE.ERROR,
-          message: deviceDb.message,
+          message: stationDb.message,
         };
       }
       // Check if user has permission in room
       const user = auth.currentUser;
-      if (deviceDb.data?.createdBy !== user?.uid) {
+      if (stationDb.data?.createdBy !== user?.uid) {
         return {
           status: STATUS_RESPONSE.ERROR,
           message: ERROR_MESSAGE.PERMISSION_DENIED,
@@ -185,8 +185,8 @@ export class DeviceAction {
       }
       // Check user has permission in room
       let room;
-      if (device.room) {
-        room = await this.roomAction.getRoom(device.room);
+      if (station.room) {
+        room = await this.roomAction.getRoom(station.room);
         if (room.status === STATUS_RESPONSE.ERROR) {
           return {
             status: STATUS_RESPONSE.ERROR,
@@ -195,21 +195,21 @@ export class DeviceAction {
         }
       }
       // Add user update info
-      device = {
-        ...convertUndefinedToNull(device),
+      station = {
+        ...convertUndefinedToNull(station),
         ...getUserUpdatedInfo(user),
       };
-      // Update device
-      await updateDoc(doc(db, Collections.DEVICES, id), {
-        ...device,
+      // Update station
+      await updateDoc(doc(db, Collections.STATIONS, id), {
+        ...station,
       });
-      // Update devices in room
+      // Update stations in room
       if (room?.data) {
-        // Update device in room
+        // Update station in room
         await this.roomAction.updateRoom(room.data?.id, {
           ...room.data,
-          devices: room.data?.devices?.map((device) =>
-            device.id === id ? { ...device, ...device } : device,
+          stations: room.data?.stations?.map((_station) =>
+            _station.id === id ? { ..._station, ...station } : _station,
           ),
         });
       }
@@ -226,29 +226,29 @@ export class DeviceAction {
     }
   };
 
-  deleteDevice = async (id: string) => {
+  deleteStation = async (id: string) => {
     try {
-      // Get device
-      const device = await this.getDevice(id);
-      if (device.status === STATUS_RESPONSE.ERROR) {
+      // Get station
+      const station = await this.getStation(id);
+      if (station.status === STATUS_RESPONSE.ERROR) {
         return {
           status: STATUS_RESPONSE.ERROR,
-          message: device.message,
+          message: station.message,
         };
       }
       // Check if user has permission in room
       const user = auth.currentUser;
-      if (device.data?.createdBy !== user?.uid) {
+      if (station.data?.createdBy !== user?.uid) {
         return {
           status: STATUS_RESPONSE.ERROR,
           message: ERROR_MESSAGE.PERMISSION_DENIED,
         };
       }
-      // Delete device
-      await deleteDoc(doc(db, Collections.DEVICES, id));
-      // Update devices in room
-      if (device.data?.room) {
-        const roomId = (device.data.room as Room).id;
+      // Delete station
+      await deleteDoc(doc(db, Collections.STATIONS, id));
+      // Update stations in room
+      if (station.data?.room) {
+        const roomId = (station.data.room as Room).id;
         const room = await this.roomAction.getRoom(roomId);
         if (room.status === STATUS_RESPONSE.ERROR) {
           return {
@@ -256,11 +256,13 @@ export class DeviceAction {
             message: room.message,
           };
         }
-        // Update device in room
+        // Update station in room
         if (room.data) {
           await this.roomAction.updateRoom(room.data?.id, {
             ...room.data,
-            devices: room.data?.devices?.filter((device) => device.id !== id),
+            stations: room.data?.stations?.filter(
+              (_station) => _station.id !== id,
+            ),
           });
         }
       }

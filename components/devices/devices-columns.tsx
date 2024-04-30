@@ -71,13 +71,6 @@ export const columns: ColumnDef<Device>[] = [
     },
   },
   {
-    accessorKey: "description",
-    header: () => <div>Description</div>,
-    cell: ({ row }) => {
-      return <div className="truncate">{row.getValue("description")}</div>;
-    },
-  },
-  {
     id: "actions",
     enableHiding: false,
     cell: ({ row }) => {

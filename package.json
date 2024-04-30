@@ -35,9 +35,12 @@
     "react-dom": "^18",
     "react-firebase-hooks": "^5.1.1",
     "react-hook-form": "^7.51.2",
+    "react-konva": "^18.2.10",
     "react-spinners": "^0.13.8",
     "tailwind-merge": "^2.2.2",
     "tailwindcss-animate": "^1.0.7",
+    "trilat": "^1.0.0",
+    "use-image": "^1.1.1",
     "uuid": "^9.0.1",
     "zod": "^3.22.4"
   },

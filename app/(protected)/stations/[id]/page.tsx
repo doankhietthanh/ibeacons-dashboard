@@ -5,30 +5,21 @@ import React, { useEffect, useState, useTransition } from "react";
 import { Separator } from "@/components/ui/separator";
 import Loader from "@/components/loader";
 import ErrorAlert from "@/components/error-alert";
-import { Room } from "@/types/room";
-import { RoomAction } from "@/actions/rooms";
 import { STATUS_RESPONSE } from "@/constants";
-import RoomActionsDropdown from "@/components/rooms/detail/room-actions-dropdown";
-import dynamic from "next/dynamic";
+import { Station } from "@/types/stations";
+import { StationAction } from "@/actions/stations";
 
-const RoomMap = dynamic(
-  () => import("../../../../components/rooms/detail/room-map"),
-  {
-    ssr: false,
-  },
-);
-
-const RoomDetailPage = ({ params }: { params: { id: string } }) => {
+const StationDetailPage = ({ params }: { params: { id: string } }) => {
   const [isPending, startTransition] = useTransition();
-  const [room, setRoom] = useState<Room | null>(null);
+  const [station, setStation] = useState<Station | null>(null);
   const [error, setError] = useState<any>(null);
 
   useEffect(() => {
     startTransition(async () => {
-      const roomAction = new RoomAction();
-      const response = await roomAction.getRoom(params.id);
+      const stationAction = new StationAction();
+      const response = await stationAction.getStation(params.id);
       if (response.status === STATUS_RESPONSE.SUCCESS) {
-        setRoom(response.data as Room);
+        setStation(response.data as Station);
       }
       if (response.status === STATUS_RESPONSE.ERROR) {
         setError(response);
@@ -52,7 +43,7 @@ const RoomDetailPage = ({ params }: { params: { id: string } }) => {
     );
   }
 
-  if (!room) {
+  if (!station) {
     return (
       <div className="flex h-full w-full items-center justify-center">
         <ErrorAlert message="Room not found." />
@@ -64,17 +55,19 @@ const RoomDetailPage = ({ params }: { params: { id: string } }) => {
     <div className="block space-y-6 py-5 md:container md:p-10">
       <div className="flex items-center justify-between gap-2 sm:flex-row">
         <div className="space-y-0.5">
-          <h2 className="text-2xl font-bold tracking-tight">{room.name}</h2>
-          <p className="hidden text-muted-foreground md:block">{room.id}</p>
+          <h2 className="text-2xl font-bold tracking-tight">{station.name}</h2>
+          <p className="hidden text-muted-foreground md:block">
+            ID: {station.id}
+          </p>
         </div>
-        <RoomActionsDropdown room={room} />
+        {/*<StationActionsDropdown station={station} />*/}
       </div>
       <Separator className="my-6" />
       <div className="flex flex-col space-y-8 lg:flex-row lg:space-x-12 lg:space-y-0">
-        <RoomMap room={room} />
+        {/*<StationController station={station} />*/}
       </div>
     </div>
   );
 };
 
-export default RoomDetailPage;
+export default StationDetailPage;

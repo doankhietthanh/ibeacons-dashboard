@@ -14,6 +14,10 @@ const nextConfig = {
         hostname: "firebasestorage.googleapis.com",
         port: ""
       }]
+  },
+  webpack: (config) => {
+    config.externals = [...config.externals, { canvas: "canvas" }]; // required to make Konva & react-konva work
+    return config;
   }
 };
 

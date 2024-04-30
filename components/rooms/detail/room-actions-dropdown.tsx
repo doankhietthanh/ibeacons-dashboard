@@ -9,7 +9,6 @@ import {
 import { Button } from "@/components/ui/button";
 import {
   EllipsisVerticalIcon,
-  PackagePlus,
   PencilIcon,
   TrashIcon,
   UserRoundPlus,
@@ -21,7 +20,7 @@ import AddMembers from "@/components/rooms/detail/add-members";
 import AddDevices from "@/components/rooms/detail/add-devices";
 import DeleteRoom from "@/components/rooms/detail/delete-room";
 
-enum DialogItem {
+enum RoomDialogItem {
   EditRoom,
   AddMembers,
   AddDevices,
@@ -29,7 +28,9 @@ enum DialogItem {
 }
 
 const RoomActionsDropdown = ({ room }: { room: Room }) => {
-  const [dialogItem, setDialogItem] = React.useState<DialogItem | null>(null);
+  const [dialogItem, setRoomDialogItem] = React.useState<RoomDialogItem | null>(
+    null,
+  );
 
   return (
     <Dialog>
@@ -44,7 +45,7 @@ const RoomActionsDropdown = ({ room }: { room: Room }) => {
             <DialogTrigger
               asChild
               onClick={() => {
-                setDialogItem(DialogItem.EditRoom);
+                setRoomDialogItem(RoomDialogItem.EditRoom);
               }}
             >
               <DropdownMenuItem className="flex w-full items-center">
@@ -55,7 +56,7 @@ const RoomActionsDropdown = ({ room }: { room: Room }) => {
             <DialogTrigger
               asChild
               onClick={() => {
-                setDialogItem(DialogItem.AddMembers);
+                setRoomDialogItem(RoomDialogItem.AddMembers);
               }}
             >
               <DropdownMenuItem>
@@ -63,22 +64,22 @@ const RoomActionsDropdown = ({ room }: { room: Room }) => {
                 <span>Add Members</span>
               </DropdownMenuItem>
             </DialogTrigger>
-            <DialogTrigger
-              asChild
-              onClick={() => {
-                setDialogItem(DialogItem.AddDevices);
-              }}
-            >
-              <DropdownMenuItem>
-                <PackagePlus className="mr-2 h-4 w-4" />
-                <span>Add Devices</span>
-              </DropdownMenuItem>
-            </DialogTrigger>
+            {/*<DialogTrigger*/}
+            {/*  asChild*/}
+            {/*  onClick={() => {*/}
+            {/*    setRoomDialogItem(RoomDialogItem.AddDevices);*/}
+            {/*  }}*/}
+            {/*>*/}
+            {/*  <DropdownMenuItem>*/}
+            {/*    <PackagePlus className="mr-2 h-4 w-4" />*/}
+            {/*    <span>Add Devices</span>*/}
+            {/*  </DropdownMenuItem>*/}
+            {/*</DialogTrigger>*/}
             <DialogTrigger
               className="text-destructive"
               asChild
               onClick={() => {
-                setDialogItem(DialogItem.DeleteRoom);
+                setRoomDialogItem(RoomDialogItem.DeleteRoom);
               }}
             >
               <DropdownMenuItem>
@@ -90,10 +91,10 @@ const RoomActionsDropdown = ({ room }: { room: Room }) => {
         </DropdownMenuContent>
       </DropdownMenu>
       {/*  Dialog Content */}
-      {dialogItem === DialogItem.EditRoom && <EditRoom room={room} />}
-      {dialogItem === DialogItem.AddMembers && <AddMembers room={room} />}
-      {dialogItem === DialogItem.AddDevices && <AddDevices room={room} />}
-      {dialogItem === DialogItem.DeleteRoom && <DeleteRoom room={room} />}
+      {dialogItem === RoomDialogItem.EditRoom && <EditRoom room={room} />}
+      {dialogItem === RoomDialogItem.AddMembers && <AddMembers room={room} />}
+      {dialogItem === RoomDialogItem.AddDevices && <AddDevices room={room} />}
+      {dialogItem === RoomDialogItem.DeleteRoom && <DeleteRoom room={room} />}
     </Dialog>
   );
 };

@@ -1,5 +1,7 @@
 import { Member } from "@/types/user";
 import { Device } from "@/types/devices";
+import { Station } from "@/types/stations";
+import { Tag } from "@/types/tags";
 
 export interface Room {
   id: string;
@@ -8,10 +10,11 @@ export interface Room {
   backgroundCover?: string;
   members?: Member[];
 
-  map?: string;
-  width?: number;
-  height?: number;
-  stations?: string[];
+  map: string;
+  width: number;
+  height: number;
+  stations?: Station[];
+  tags?: Tag[];
   devices?: Device[];
 
   createdBy?: string;
@@ -29,8 +32,9 @@ export interface RoomUpdate {
   // map?: string;
   // width?: number;
   // height?: number;
-  stations?: string[];
+  stations?: Station[];
   devices?: Device[];
+  tags?: Tag[];
 
   createdBy?: string;
   updatedBy?: string;

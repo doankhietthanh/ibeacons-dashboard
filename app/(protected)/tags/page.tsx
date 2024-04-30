@@ -5,25 +5,25 @@ import React, { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { PlusIcon } from "lucide-react";
-import { Device } from "@/types/devices";
-import { DeviceAction } from "@/actions/devices";
 import { STATUS_RESPONSE } from "@/constants";
-import { columns } from "@/components/devices/devices-columns";
+import { columns } from "@/components/tags/tags-columns";
 import ErrorAlert from "@/components/error-alert";
 import Loader from "@/components/loader";
 import DataTable from "@/components/data-table";
+import { TagAction } from "@/actions/tags";
+import { Tag } from "@/types/tags";
 
-const DevicesPage = () => {
+const TagsPage = () => {
   const [isPending, startTransition] = useTransition();
-  const [devices, setDevices] = useState<Device[]>([]);
+  const [devices, setDevices] = useState<Tag[]>([]);
   const [error, setError] = useState<any>(null);
 
   useEffect(() => {
     startTransition(async () => {
-      const deviceAction = new DeviceAction();
-      const response = await deviceAction.getDevices();
+      const tagAction = new TagAction();
+      const response = await tagAction.getTags();
       if (response.status === STATUS_RESPONSE.SUCCESS) {
-        setDevices(response.data as Device[]);
+        setDevices(response.data as Tag[]);
       }
       if (response.status === STATUS_RESPONSE.ERROR) {
         setError(response.message);
@@ -35,15 +35,15 @@ const DevicesPage = () => {
     <div className="block space-y-6 py-5 md:container md:p-10">
       <div className="flex items-center justify-between gap-2 sm:flex-row">
         <div className="space-y-0.5">
-          <h2 className="text-2xl font-bold tracking-tight">Devices</h2>
+          <h2 className="text-2xl font-bold tracking-tight">Tags</h2>
           <p className="hidden text-muted-foreground md:block">
-            Manage devices and view their status.
+            Manage tags and view their status.
           </p>
         </div>
-        <Link href="/devices/create">
+        <Link href="/tags/create">
           <Button variant="default">
             <PlusIcon className="mr-2 h-6 w-6" />
-            Create devices
+            Create tags
           </Button>
         </Link>
       </div>
@@ -69,4 +69,4 @@ const DevicesPage = () => {
   );
 };
 
-export default DevicesPage;
+export default TagsPage;

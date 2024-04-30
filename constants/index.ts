@@ -22,5 +22,7 @@ export enum ERROR_MESSAGE {
 
 export enum LOCAL_STORAGE_KEY {
   TOTAL_ROOMS = "total_rooms",
+  TOTAL_STATIONS = "total_stations",
+  TOTAL_TAGS = "total_tags",
   TOTAL_DEVICES = "total_devices",
 }

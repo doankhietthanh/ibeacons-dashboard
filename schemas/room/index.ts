@@ -10,9 +10,9 @@ export const CreateRoomSchema = z.object({
   backgroundCover: z.string().url().optional(),
   members: z.array(MemberSchema).optional(),
 
-  map: z.string().url().optional(),
-  width: z.coerce.number().min(0).optional(),
-  height: z.coerce.number().min(0).optional(),
+  map: z.string().url(),
+  width: z.coerce.number().min(0),
+  height: z.coerce.number().min(0),
 });
 
 export const UpdateRoomSchema = z.object({

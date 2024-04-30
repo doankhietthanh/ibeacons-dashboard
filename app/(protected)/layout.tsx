@@ -10,8 +10,10 @@ import DesktopNav from "@/components/navbar/desktop-nav";
 import {
   BlocksIcon,
   LayoutDashboardIcon,
+  NetworkIcon,
   Settings2Icon,
   SettingsIcon,
+  TagsIcon,
 } from "lucide-react";
 import MobileNavbar from "@/components/navbar/mobile-nav";
 import { redirect } from "next/navigation";
@@ -35,6 +37,16 @@ const routers: NavbarItemProps[] = [
     title: "Rooms",
     href: "/rooms",
     icon: <BlocksIcon />,
+  },
+  {
+    title: "Stations",
+    href: "/stations",
+    icon: <NetworkIcon />,
+  },
+  {
+    title: "Tags",
+    href: "/tags",
+    icon: <TagsIcon />,
   },
   {
     title: "Devices",
