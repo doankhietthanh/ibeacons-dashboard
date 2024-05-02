@@ -17,9 +17,11 @@ import { Collections } from "@/types/collections";
 import { convertUndefinedToNull } from "@/common";
 import { Station, StationCreate, StationUpdate } from "@/types/stations";
 import { Room } from "@/types/room";
+import { getDatabase, ref, set } from "@firebase/database";
 
 const auth = getAuth(firebase);
 const db = getFirestore(firebase);
+const rtDb = getDatabase(firebase);
 
 export class StationAction {
   private readonly roomAction = new RoomAction();
@@ -152,6 +154,19 @@ export class StationAction {
           ],
         });
       }
+      // Set station to real-time database
+      await set(ref(rtDb, `rooms/${room?.data?.id}/stations/${station.id}`), {
+        name: station.name,
+        description: station.description,
+        position: {
+          x: Math.floor(Math.random() * 100),
+          y: Math.floor(Math.random() * 100),
+        },
+      });
+      await set(ref(rtDb, `stations/${station.id}`), {
+        room: room?.data?.id,
+      });
+      // Return success
       return {
         status: STATUS_RESPONSE.SUCCESS,
         message: SUCCESS_MESSAGE.CREATED_SUCCESS,
@@ -213,6 +228,12 @@ export class StationAction {
           ),
         });
       }
+      // Set room to real-time database
+      await set(ref(rtDb, `rooms/${room?.data?.id}/stations/${id}`), {
+        name: station.name,
+        description: station.description,
+      });
+      // Return success
       return {
         status: STATUS_RESPONSE.SUCCESS,
         message: SUCCESS_MESSAGE.UPDATED_SUCCESS,

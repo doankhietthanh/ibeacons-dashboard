@@ -9,9 +9,11 @@ import { Collections } from "@/types/collections";
 import { convertUndefinedToNull } from "@/common";
 import { Room } from "@/types/room";
 import { Tag, TagCreate, TagUpdate } from "@/types/tags";
+import { getDatabase, ref, set } from "@firebase/database";
 
 const auth = getAuth(firebase);
 const db = getFirestore(firebase);
+const rtDb = getDatabase(firebase);
 
 export class TagAction {
   private readonly roomAction = new RoomAction();
@@ -131,6 +133,15 @@ export class TagAction {
           tags: [...(room.data.tags ? (room.data?.tags as Tag[]) : []), tag],
         });
       }
+      // Set tag in realtime database
+      await set(ref(rtDb, `rooms/${room?.data?.id}/tags/${tag.id}`), {
+        name: tag.name,
+        description: tag.description,
+        macAddress: tag.macAddress,
+      });
+      await set(ref(rtDb, `tags/${tag.id}`), {
+        room: room?.data?.id,
+      });
       return {
         status: STATUS_RESPONSE.SUCCESS,
         message: SUCCESS_MESSAGE.CREATED_SUCCESS,
@@ -192,6 +203,12 @@ export class TagAction {
           ),
         });
       }
+      // Set tag in realtime database
+      await set(ref(rtDb, `rooms/${room?.data?.id}/tags/${id}`), {
+        name: tag.name,
+        description: tag.description,
+      });
+      // Update tags in room
       return {
         status: STATUS_RESPONSE.SUCCESS,
         message: SUCCESS_MESSAGE.UPDATED_SUCCESS,

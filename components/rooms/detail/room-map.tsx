@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Circle, Group, Image, Layer, Line, Stage, Text } from "react-konva";
+import { Circle, Group, Image, Layer, Stage, Text } from "react-konva";
 import { Room } from "@/types/room";
 import useImage from "use-image";
 import { getDatabase, onValue, ref, set } from "@firebase/database";
 import { RoomAction } from "@/actions/rooms";
 import firebase from "@/lib/firebase";
+import { locate } from "@/lib/beacon";
 
 const database = getDatabase(firebase);
 
@@ -24,35 +25,13 @@ const MapBackground = ({
 };
 
 const RoomMap = ({ room }: { room: Room }) => {
-  const [lines, setLines] = useState<any>([]);
-  const [currentX, setCurrentX] = useState(0);
-  const [currentY, setCurrentY] = useState(0);
-
   const [withMap, setWithMap] = useState(room.width);
   const [heightMap, setHeightMap] = useState(room.height);
 
   const [stations, setStations] = useState<any[]>([]);
+  const [stationsRaw, setStationsRaw] = useState<any>({});
   const [tags, setTags] = useState<any[]>([]);
-
-  const handleMouseDown = () => {
-    const newPoints = lines.slice();
-    if (newPoints.length > 0) {
-      newPoints[lines.length - 1].points = newPoints[
-        lines.length - 1
-      ].points.concat([currentX, currentY]);
-      setLines(newPoints);
-    } else {
-      setLines([...lines, { points: [currentX, currentY] }]);
-    }
-  };
-
-  const handleXChange = (e: any) => {
-    setCurrentX(parseInt(e.target.value));
-  };
-
-  const handleYChange = (e: any) => {
-    setCurrentY(parseInt(e.target.value));
-  };
+  const [pxMeter, setPxMeter] = useState(0);
 
   // Calculate the width and height of the map to fit the div id "room-map"
   useEffect(() => {
@@ -65,11 +44,11 @@ const RoomMap = ({ room }: { room: Room }) => {
     if (aspectRatio > 1) {
       setWithMap(screenWidth);
       setHeightMap(screenWidth / aspectRatio);
-      console.log(screenWidth / aspectRatio);
     } else {
       setWithMap(screenHeight * aspectRatio);
       setHeightMap(screenHeight);
     }
+    setPxMeter(screenWidth / width);
   }, [room.map, room.width, room.height]);
 
   // Get stations by room id from Realtime Database
@@ -81,11 +60,13 @@ const RoomMap = ({ room }: { room: Room }) => {
       // return new data of stations just get position
       const data = snapshot.val();
       if (data) {
+        setStationsRaw(data);
         const stations = Object.keys(data).map((key) => {
           return {
             id: key,
-            x: snapshot.val()[key].position.x,
-            y: snapshot.val()[key].position.y,
+            name: snapshot.val()[key].name || "",
+            x: snapshot.val()[key].position?.x || 0,
+            y: snapshot.val()[key].position?.y || 0,
           };
         });
         setStations(stations);
@@ -93,18 +74,28 @@ const RoomMap = ({ room }: { room: Room }) => {
     });
   }, [room.id]);
 
+  useEffect(() => {
+    onValue(ref(database, "rooms/" + room.id + "/tags"), (snapshot) => {
+      // return new data of stations just get position
+      const data = snapshot.val();
+      if (data) {
+        const tags = Object.keys(data).map((key) => {
+          return {
+            id: key,
+            name: snapshot.val()[key].name || "",
+            stations: snapshot.val()[key].stations || [],
+          };
+        });
+        setTags(tags);
+      }
+    });
+  }, []);
+
   return (
     <div
-      className="flex h-full w-full flex-col items-center justify-center"
+      className="flex h-[calc(100vh-226px)] w-full flex-col items-center justify-center"
       id="room-map"
     >
-      <div>
-        <label>X:</label>
-        <input type="number" value={currentX} onChange={handleXChange} />
-        <label>Y:</label>
-        <input type="number" value={currentY} onChange={handleYChange} />
-        <button onClick={handleMouseDown}>Add Pin</button>
-      </div>
       <Stage width={withMap} height={heightMap}>
         <Layer>
           <MapBackground url={room.map} width={withMap} height={heightMap} />
@@ -114,13 +105,13 @@ const RoomMap = ({ room }: { room: Room }) => {
                 <Circle
                   x={station.x}
                   y={station.y}
-                  radius={20}
+                  radius={15}
                   fill="green"
                   draggable
                   onDragEnd={async (e) => {
                     const newStations = stations.slice();
-                    newStations[i].x = e.target.x();
-                    newStations[i].y = e.target.y();
+                    newStations[i].x = Math.round(e.target.x());
+                    newStations[i].y = Math.round(e.target.y());
                     // Update station position in Realtime Database
                     await set(
                       ref(
@@ -132,8 +123,8 @@ const RoomMap = ({ room }: { room: Room }) => {
                           "/position",
                       ),
                       {
-                        x: e.target.x(),
-                        y: e.target.y(),
+                        x: Math.round(e.target.x()),
+                        y: Math.round(e.target.y()),
                       },
                     );
                     setStations(newStations);
@@ -147,32 +138,36 @@ const RoomMap = ({ room }: { room: Room }) => {
                 <Text
                   x={station.x + 10}
                   y={station.y - 30}
-                  text={`(${station.id})`}
+                  text={`${station.name}`}
                 />
               </Group>
             );
           })}
-          {lines.map((line: any, i: any) => {
+          {tags.map((tag: any, i: any) => {
+            if (!tag.stations || tag.stations.length < 3) return;
+            if (Object.keys(stationsRaw).length < 3) return;
+            const tagPosition = locate(tag.stations, stationsRaw, pxMeter);
             return (
-              <Line
-                key={i}
-                points={line.points}
-                stroke="red"
-                strokeWidth={2}
-                tension={0.5}
-                lineCap="round"
-                globalCompositeOperation="source-over"
-              />
+              <Group key={i}>
+                <Circle
+                  x={tagPosition.x}
+                  y={tagPosition.y}
+                  radius={10}
+                  fill="red"
+                />
+                <Text
+                  x={tagPosition.x + 10}
+                  y={tagPosition.y - 10}
+                  text={`(${tagPosition.x}, ${tagPosition.y})`}
+                />
+                <Text
+                  x={tagPosition.x + 10}
+                  y={tagPosition.y - 30}
+                  text={`${tag.name}`}
+                />
+              </Group>
             );
           })}
-          <Group>
-            <Circle x={currentX} y={currentY} radius={5} fill="blue" />
-            <Text
-              x={currentX + 10}
-              y={currentY - 10}
-              text={`(${currentX}, ${currentY})`}
-            />
-          </Group>
         </Layer>
       </Stage>
     </div>

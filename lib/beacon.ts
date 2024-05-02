@@ -21,24 +21,28 @@ export const locate = (beacon: any, stations: any, px_meter: number) => {
   });
   keysSorted.reverse();
 
+  console.log(keysSorted, stations, stations[keysSorted[0]]);
+
   const input = [
     //      X     Y     R
     [
-      parseInt(stations[keysSorted[0]].x, 10),
-      parseInt(stations[keysSorted[0]].y, 10),
+      parseInt(stations[keysSorted[0]].position.x, 10),
+      parseInt(stations[keysSorted[0]].position.y, 10),
       calculateDistance(beacon[keysSorted[0]].rssi),
     ],
     [
-      parseInt(stations[keysSorted[1]].x, 10),
-      parseInt(stations[keysSorted[1]].y, 10),
+      parseInt(stations[keysSorted[1]].position.x, 10),
+      parseInt(stations[keysSorted[1]].position.y, 10),
       calculateDistance(beacon[keysSorted[1]].rssi),
     ],
     [
-      parseInt(stations[keysSorted[2]].x, 10),
-      parseInt(stations[keysSorted[2]].y, 10),
+      parseInt(stations[keysSorted[2]].position.x, 10),
+      parseInt(stations[keysSorted[2]].position.y, 10),
       calculateDistance(beacon[keysSorted[2]].rssi),
     ],
   ];
+
+  console.log(input);
 
   const output = trilat(input);
   return {

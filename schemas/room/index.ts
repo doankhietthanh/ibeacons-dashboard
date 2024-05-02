@@ -10,7 +10,7 @@ export const CreateRoomSchema = z.object({
   backgroundCover: z.string().url().optional(),
   members: z.array(MemberSchema).optional(),
 
-  map: z.string().url(),
+  map: z.string().url().optional(),
   width: z.coerce.number().min(0),
   height: z.coerce.number().min(0),
 });

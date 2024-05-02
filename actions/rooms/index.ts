@@ -22,10 +22,14 @@ import { Collections } from "@/types/collections";
 import { ERROR_MESSAGE, STATUS_RESPONSE, SUCCESS_MESSAGE } from "@/constants";
 import { MemberRole, MemberStatus } from "@/types/user";
 import { convertUndefinedToNull } from "@/common";
+import { StationAction } from "@/actions/stations";
+import { TagAction } from "@/actions/tags";
+import { getDatabase, ref as rtDbRef, remove } from "@firebase/database";
 
 const auth = getAuth(firebase);
 const storage = getStorage(firebase);
 const db = getFirestore(firebase);
+const rtDb = getDatabase(firebase);
 
 export class RoomAction {
   getRoom = async (id: string) => {
@@ -230,8 +234,21 @@ export class RoomAction {
           message: room.message,
         };
       }
+      // Delete stations
+      room.data?.stations?.map(async (station) => {
+        const stationAction = new StationAction();
+        await stationAction.deleteStation(station.id);
+      });
+      // Delete tags
+      room.data?.tags?.map(async (tag) => {
+        const tagAction = new TagAction();
+        await tagAction.deleteTag(tag.id);
+      });
       // Delete room
       await deleteDoc(doc(db, Collections.ROOMS, id));
+      // Delete room in real-time database
+      await remove(rtDbRef(rtDb, `rooms/${id}`));
+      // Return success
       return {
         status: STATUS_RESPONSE.SUCCESS,
         message: SUCCESS_MESSAGE.DELETED_SUCCESS,

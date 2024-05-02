@@ -11,7 +11,6 @@ import {
   BlocksIcon,
   LayoutDashboardIcon,
   NetworkIcon,
-  Settings2Icon,
   SettingsIcon,
   TagsIcon,
 } from "lucide-react";
@@ -48,11 +47,11 @@ const routers: NavbarItemProps[] = [
     href: "/tags",
     icon: <TagsIcon />,
   },
-  {
-    title: "Devices",
-    href: "/devices",
-    icon: <Settings2Icon />,
-  },
+  // {
+  //   title: "Devices",
+  //   href: "/devices",
+  //   icon: <Settings2Icon />,
+  // },
   {
     title: "Settings",
     href: "/settings",

@@ -53,25 +53,23 @@ const RoomsGallery = () => {
     );
   }
 
-  if (!rooms) {
-    return (
-      <div className="flex h-full w-full items-center justify-center">
-        <ErrorAlert message="No rooms found." />
-      </div>
-    );
-  }
-
   return (
     <div className="grid h-full w-full grid-cols-1 justify-items-center gap-5 md:grid-cols-2 lg:grid-cols-3">
-      {rooms.map((room) => (
-        <Link
-          href={`/rooms/${room.id}`}
-          key={room.id}
-          className="w-full cursor-pointer lg:max-w-[400px]"
-        >
-          <RoomCard room={room as Room} />
-        </Link>
-      ))}
+      {!rooms || !rooms.length ? (
+        <div className="h-full w-full items-center justify-center">
+          No results.
+        </div>
+      ) : (
+        rooms.map((room) => (
+          <Link
+            href={`/rooms/${room.id}`}
+            key={room.id}
+            className="w-full cursor-pointer lg:max-w-[400px]"
+          >
+            <RoomCard room={room as Room} />
+          </Link>
+        ))
+      )}
     </div>
   );
 };
@@ -98,7 +96,7 @@ const RoomCard = ({ room }: { room: Room }) => {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        Size: {room.width}x{room.height}
+        Size: {room.width}m x {room.height}m
       </CardContent>
     </Card>
   );

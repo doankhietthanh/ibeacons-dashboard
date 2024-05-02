@@ -57,6 +57,8 @@ const DeleteRoom = ({ room }: { room: Room }) => {
       });
       if (result.status === "success") {
         localStorage.removeItem(LOCAL_STORAGE_KEY.TOTAL_ROOMS);
+        localStorage.removeItem(LOCAL_STORAGE_KEY.TOTAL_STATIONS);
+        localStorage.removeItem(LOCAL_STORAGE_KEY.TOTAL_TAGS);
         router.push(BACK_TO_ROOMS_PAGE);
       }
     });

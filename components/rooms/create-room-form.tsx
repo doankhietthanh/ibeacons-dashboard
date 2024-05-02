@@ -40,12 +40,11 @@ const CreateRoomForm = () => {
     resolver: zodResolver(CreateRoomSchema),
     defaultValues: {
       id: uuidv4(),
-      backgroundCover: "https://picsum.photos/id/237/200/300",
-      map: "https://picsum.photos/id/238/200/300",
     },
   });
 
   const onSubmit = async (values: z.infer<typeof CreateRoomSchema>) => {
+    console.log(values);
     startTransition(async () => {
       const roomAction = new RoomAction();
       const result = await roomAction.createRoom(
