@@ -44,7 +44,6 @@ const CreateRoomForm = () => {
   });
 
   const onSubmit = async (values: z.infer<typeof CreateRoomSchema>) => {
-    console.log(values);
     startTransition(async () => {
       const roomAction = new RoomAction();
       const result = await roomAction.createRoom(

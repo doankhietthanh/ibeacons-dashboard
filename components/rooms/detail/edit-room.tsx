@@ -45,7 +45,7 @@ const EditRoom = ({ room }: { room: Room }) => {
     defaultValues: {
       name: room.name,
       description: room.description,
-      backgroundCover: room.backgroundCover,
+      backgroundCover: room.backgroundCover as string,
     },
   });
 
@@ -131,8 +131,8 @@ const EditRoom = ({ room }: { room: Room }) => {
                     <Image
                       src={
                         backgroundCover
-                          ? URL.createObjectURL(backgroundCover)
-                          : room.backgroundCover || ""
+                          ? URL.createObjectURL(backgroundCover as File)
+                          : (room.backgroundCover as string) || ""
                       }
                       alt="Image"
                       className="h-full w-full rounded-md object-cover"

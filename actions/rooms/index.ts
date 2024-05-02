@@ -204,7 +204,6 @@ export class RoomAction {
         await uploadBytes(storageRef, backgroundCover, {
           contentType: "image/jpeg",
         });
-        console.log("Upload image");
         room.backgroundCover = await getDownloadURL(storageRef);
       }
       // Add user update info

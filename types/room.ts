@@ -7,10 +7,10 @@ export interface Room {
   id: string;
   name: string;
   description?: string;
-  backgroundCover?: string;
+  backgroundCover?: File | string;
   members?: Member[];
 
-  map: string;
+  map: File | string;
   width: number;
   height: number;
   stations?: Station[];
@@ -26,7 +26,7 @@ export interface Room {
 export interface RoomUpdate {
   name?: string;
   description?: string;
-  backgroundCover?: string;
+  backgroundCover?: File | string;
   members?: Member[];
 
   // map?: string;

@@ -98,7 +98,11 @@ const RoomMap = ({ room }: { room: Room }) => {
     >
       <Stage width={withMap} height={heightMap}>
         <Layer>
-          <MapBackground url={room.map} width={withMap} height={heightMap} />
+          <MapBackground
+            url={room.map as string}
+            width={withMap}
+            height={heightMap}
+          />
           {stations.map((station: any, i: any) => {
             return (
               <Group key={i}>

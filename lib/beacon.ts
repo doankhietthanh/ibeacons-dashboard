@@ -21,8 +21,6 @@ export const locate = (beacon: any, stations: any, px_meter: number) => {
   });
   keysSorted.reverse();
 
-  console.log(keysSorted, stations, stations[keysSorted[0]]);
-
   const input = [
     //      X     Y     R
     [
@@ -41,9 +39,6 @@ export const locate = (beacon: any, stations: any, px_meter: number) => {
       calculateDistance(beacon[keysSorted[2]].rssi),
     ],
   ];
-
-  console.log(input);
-
   const output = trilat(input);
   return {
     x: parseInt(output[0], 10),
