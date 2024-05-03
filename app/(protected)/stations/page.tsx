@@ -43,7 +43,7 @@ const StationsPage = () => {
         <Link href="/stations/create">
           <Button variant="default">
             <PlusIcon className="mr-2 h-6 w-6" />
-            Create stations
+            Create station
           </Button>
         </Link>
       </div>

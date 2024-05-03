@@ -43,7 +43,7 @@ const TagsPage = () => {
         <Link href="/tags/create">
           <Button variant="default">
             <PlusIcon className="mr-2 h-6 w-6" />
-            Create tags
+            Create tag
           </Button>
         </Link>
       </div>

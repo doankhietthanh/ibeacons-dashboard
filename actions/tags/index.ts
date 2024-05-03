@@ -139,8 +139,9 @@ export class TagAction {
         description: tag.description,
         macAddress: tag.macAddress,
       });
-      await set(ref(rtDb, `tags/${tag.id}`), {
+      await set(ref(rtDb, `tags/${tag.macAddress}`), {
         room: room?.data?.id,
+        id: tag.id,
       });
       return {
         status: STATUS_RESPONSE.SUCCESS,

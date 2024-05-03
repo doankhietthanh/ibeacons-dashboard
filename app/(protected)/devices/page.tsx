@@ -43,7 +43,7 @@ const DevicesPage = () => {
         <Link href="/devices/create">
           <Button variant="default">
             <PlusIcon className="mr-2 h-6 w-6" />
-            Create devices
+            Create device
           </Button>
         </Link>
       </div>

@@ -6,7 +6,7 @@ const CreateTagPage = () => {
   return (
     <div className="block space-y-6 py-5 md:container md:p-10">
       <div className="space-y-0.5">
-        <h2 className="text-2xl font-bold tracking-tight">Create tags</h2>
+        <h2 className="text-2xl font-bold tracking-tight">Create tag</h2>
         <p className="text-muted-foreground">Create a new tag.</p>
       </div>
       <Separator className="my-6" />

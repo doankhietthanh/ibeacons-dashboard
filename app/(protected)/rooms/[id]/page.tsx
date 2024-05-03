@@ -65,7 +65,9 @@ const RoomDetailPage = ({ params }: { params: { id: string } }) => {
       <div className="flex items-center justify-between gap-2 sm:flex-row">
         <div className="space-y-0.5">
           <h2 className="text-2xl font-bold tracking-tight">{room.name}</h2>
-          <p className="hidden text-muted-foreground md:block">{room.id}</p>
+          <p className="hidden text-muted-foreground md:block">
+            {room.description}
+          </p>
         </div>
         <RoomActionsDropdown room={room} />
       </div>
