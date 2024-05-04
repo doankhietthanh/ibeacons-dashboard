@@ -2,7 +2,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { TriangleAlertIcon } from "lucide-react";
 
 interface ErrorAlertProps {
-  message: string | undefined;
+  message: object | string | undefined;
 }
 
 const ErrorAlert = ({ message }: ErrorAlertProps) => {
@@ -12,7 +12,9 @@ const ErrorAlert = ({ message }: ErrorAlertProps) => {
     <Alert variant="destructive">
       <TriangleAlertIcon className="h-4 w-4" />
       <AlertTitle>Error!</AlertTitle>
-      <AlertDescription>{message}</AlertDescription>
+      <AlertDescription>
+        {typeof message === "object" ? message.toString() : message}
+      </AlertDescription>
     </Alert>
   );
 };

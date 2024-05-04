@@ -49,13 +49,18 @@ export class StationAction {
       });
       // get stations has room
       const rooms = await this.roomAction.getRooms();
-      if (rooms.status === STATUS_RESPONSE.SUCCESS) {
-        rooms.data?.forEach((room) => {
-          room.stations?.forEach((station) => {
-            stations.push({ ...station, room: room });
-          });
-        });
+      if (rooms.status === STATUS_RESPONSE.ERROR) {
+        return {
+          status: STATUS_RESPONSE.ERROR,
+          message: rooms.message,
+        };
       }
+
+      rooms.data?.forEach((room) => {
+        room.stations?.forEach((station) => {
+          stations.push({ ...station, room: room });
+        });
+      });
 
       return {
         status: STATUS_RESPONSE.SUCCESS,

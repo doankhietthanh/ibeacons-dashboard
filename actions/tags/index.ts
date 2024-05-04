@@ -31,13 +31,17 @@ export class TagAction {
       let tags: Tag[] = [];
       // get tags has room
       const rooms = await this.roomAction.getRooms();
-      if (rooms.status === STATUS_RESPONSE.SUCCESS) {
-        rooms.data?.forEach((room) => {
-          room.tags?.forEach((tag) => {
-            tags.push({ ...tag, room: room });
-          });
-        });
+      if (rooms.status === STATUS_RESPONSE.ERROR) {
+        return {
+          status: STATUS_RESPONSE.ERROR,
+          message: rooms.message,
+        };
       }
+      rooms.data?.forEach((room) => {
+        room.tags?.forEach((tag) => {
+          tags.push({ ...tag, room: room });
+        });
+      });
 
       return {
         status: STATUS_RESPONSE.SUCCESS,

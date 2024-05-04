@@ -15,7 +15,7 @@ import { Tag } from "@/types/tags";
 
 const TagsPage = () => {
   const [isPending, startTransition] = useTransition();
-  const [devices, setDevices] = useState<Tag[]>([]);
+  const [tags, setTags] = useState<Tag[]>([]);
   const [error, setError] = useState<any>(null);
 
   useEffect(() => {
@@ -23,7 +23,7 @@ const TagsPage = () => {
       const tagAction = new TagAction();
       const response = await tagAction.getTags();
       if (response.status === STATUS_RESPONSE.SUCCESS) {
-        setDevices(response.data as Tag[]);
+        setTags(response.data as Tag[]);
       }
       if (response.status === STATUS_RESPONSE.ERROR) {
         setError(response.message);
@@ -57,12 +57,12 @@ const TagsPage = () => {
           <div className="flex h-full w-full items-center justify-center">
             <ErrorAlert message={error} />
           </div>
-        ) : !devices ? (
+        ) : !tags ? (
           <div className="flex h-full w-full items-center justify-center">
-            <ErrorAlert message="No devices found." />
+            <ErrorAlert message="No tags found." />
           </div>
         ) : (
-          <DataTable columns={columns} data={devices} />
+          <DataTable columns={columns} data={tags} />
         )}
       </div>
     </div>
