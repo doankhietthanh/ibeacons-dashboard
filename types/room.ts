@@ -10,7 +10,7 @@ export interface Room {
   backgroundCover?: File | string;
   members?: Member[];
 
-  map: File | string;
+  map?: File | string;
   width: number;
   height: number;
   stations?: Station[];

@@ -81,7 +81,7 @@ const RoomCard = ({ room }: { room: Room }) => {
     <Card>
       <AspectRatio ratio={16 / 9}>
         <Image
-          src={(room.backgroundCover as string) || ""}
+          src={(room.backgroundCover as string) || (room.map as string) || ""}
           alt="Image"
           className="h-full w-full rounded-t-md object-cover"
           width={0}

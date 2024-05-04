@@ -7,10 +7,10 @@ export const CreateRoomSchema = z.object({
     message: "Name is required.",
   }),
   description: z.string().optional(),
-  backgroundCover: z.instanceof(File).optional(),
+  backgroundCover: z.any(),
   members: z.array(MemberSchema).optional(),
 
-  map: z.instanceof(File),
+  map: z.any(),
   width: z.coerce.number().min(0),
   height: z.coerce.number().min(0),
 });
