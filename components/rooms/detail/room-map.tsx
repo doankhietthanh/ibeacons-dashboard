@@ -38,15 +38,34 @@ const RoomMap = ({ room }: { room: Room }) => {
     const roomMapDom = document.getElementById("room-map");
     const width = room.width;
     const height = room.height;
+    const aspectRatio = width / height;
+
+    const maxWidth = window.innerWidth - 32 * 2;
+    const maxHeight = window.innerHeight - 226;
+
     const screenWidth = roomMapDom?.clientWidth || 0;
     const screenHeight = roomMapDom?.clientHeight || 0;
-    const aspectRatio = width / height;
+
     if (aspectRatio > 1) {
-      setWithMap(screenWidth);
-      setHeightMap(screenWidth / aspectRatio);
+      const newWidth = screenWidth > maxWidth ? maxWidth : screenWidth;
+      const newHeight = newWidth / aspectRatio;
+      if (newHeight > maxHeight) {
+        setHeightMap(maxHeight);
+        setWithMap(maxHeight * aspectRatio);
+      } else {
+        setHeightMap(newHeight);
+        setWithMap(newWidth);
+      }
     } else {
-      setWithMap(screenHeight * aspectRatio);
-      setHeightMap(screenHeight);
+      const newHeight = screenHeight > maxHeight ? maxHeight : screenHeight;
+      const newWidth = newHeight * aspectRatio;
+      if (newWidth > maxWidth) {
+        setWithMap(maxWidth);
+        setHeightMap(maxWidth / aspectRatio);
+      } else {
+        setWithMap(newWidth);
+        setHeightMap(newHeight);
+      }
     }
     setPxMeter(screenWidth / width);
   }, [room.map, room.width, room.height]);
@@ -114,8 +133,20 @@ const RoomMap = ({ room }: { room: Room }) => {
                   draggable
                   onDragEnd={async (e) => {
                     const newStations = stations.slice();
-                    newStations[i].x = Math.round(e.target.x());
-                    newStations[i].y = Math.round(e.target.y());
+                    if (Math.round(e.target.x()) < 0) {
+                      newStations[i].x = 0;
+                    } else if (Math.round(e.target.x()) > withMap) {
+                      newStations[i].x = withMap;
+                    } else {
+                      newStations[i].x = Math.round(e.target.x());
+                    }
+                    if (Math.round(e.target.y()) < 0) {
+                      newStations[i].y = 0;
+                    } else if (Math.round(e.target.y()) > heightMap) {
+                      newStations[i].y = heightMap;
+                    } else {
+                      newStations[i].y = Math.round(e.target.y());
+                    }
                     // Update station position in Realtime Database
                     await set(
                       ref(
