@@ -16,55 +16,17 @@ const ItemsSummary = () => {
     const metricsAction = new MetricsAction();
     startTransition(async () => {
       // Fetch total rooms
-      let rooms: string | number | null = localStorage.getItem(
-        LOCAL_STORAGE_KEY.TOTAL_ROOMS,
-      );
-      if (rooms) {
-        setTotalRooms(parseInt(rooms));
-      } else {
-        rooms = await metricsAction.getTotalRooms();
-        setTotalRooms(rooms);
-        localStorage.setItem(LOCAL_STORAGE_KEY.TOTAL_ROOMS, rooms.toString());
-      }
-      // Fetch total stations
-      let stations: string | number | null = localStorage.getItem(
-        LOCAL_STORAGE_KEY.TOTAL_STATIONS,
-      );
-      if (stations) {
-        setTotalStations(parseInt(stations));
-      } else {
-        stations = await metricsAction.getTotalStations();
-        setTotalStations(stations);
-        localStorage.setItem(
-          LOCAL_STORAGE_KEY.TOTAL_STATIONS,
-          stations.toString(),
-        );
-      }
-      // Fetch total tags
-      let tags: string | number | null = localStorage.getItem(
-        LOCAL_STORAGE_KEY.TOTAL_TAGS,
-      );
-      if (tags) {
-        setTotalTags(parseInt(tags));
-      } else {
-        tags = await metricsAction.getTotalTags();
-        setTotalTags(tags);
-        localStorage.setItem(LOCAL_STORAGE_KEY.TOTAL_TAGS, tags.toString());
-      }
-      // Fetch total devices.
-      let devices: string | number | null = localStorage.getItem(
-        LOCAL_STORAGE_KEY.TOTAL_DEVICES,
-      );
-      if (devices) {
-        setTotalDevices(parseInt(devices));
-      } else {
-        devices = await metricsAction.getTotalDevices();
-        setTotalDevices(devices);
-        localStorage.setItem(
-          LOCAL_STORAGE_KEY.TOTAL_DEVICES,
-          devices.toString(),
-        );
-      }
+      const rooms = await metricsAction.getTotalRooms();
+      setTotalRooms(rooms);
+
+      const stations = await metricsAction.getTotalStations();
+      setTotalStations(stations);
+
+      const tags = await metricsAction.getTotalTags();
+      setTotalTags(tags);
+
+      const devices = await metricsAction.getTotalDevices();
+      setTotalDevices(devices);
     });
   }, [startTransition]);
 

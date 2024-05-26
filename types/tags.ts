@@ -1,4 +1,6 @@
 import { Room } from "@/types/room";
+import exp from "constants";
+import { StationPosition } from "./stations";
 
 export interface TagCreate {
   id: string;
@@ -32,4 +34,14 @@ export interface Tag {
   updatedBy?: string;
   createdAt?: Date;
   updatedAt?: Date;
+}
+
+export interface TagData {
+  rssi: number;
+  txPower: number;
+}
+
+export interface TagPosition extends Tag {
+  stations: Record<string, TagData>;
+  raw: StationPosition[];
 }

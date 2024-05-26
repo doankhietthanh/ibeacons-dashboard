@@ -34,3 +34,8 @@ export interface Station {
   createdAt?: Date;
   updatedAt?: Date;
 }
+
+export interface StationPosition extends Station {
+  x: number;
+  y: number;
+}

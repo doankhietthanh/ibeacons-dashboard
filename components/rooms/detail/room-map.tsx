@@ -1,11 +1,14 @@
-import React, { useEffect, useState } from "react";
-import { Circle, Group, Image, Layer, Stage, Text } from "react-konva";
-import { Room } from "@/types/room";
-import useImage from "use-image";
-import { getDatabase, onValue, ref, set } from "@firebase/database";
 import { RoomAction } from "@/actions/rooms";
-import firebase from "@/lib/firebase";
+import DataTable from "@/components/data-table";
 import { locate } from "@/lib/beacon";
+import firebase from "@/lib/firebase";
+import { Room } from "@/types/room";
+import { TagPosition } from "@/types/tags";
+import { getDatabase, onValue, ref, set } from "@firebase/database";
+import { useEffect, useState } from "react";
+import { Circle, Group, Image, Layer, Stage, Text } from "react-konva";
+import useImage from "use-image";
+import { columns as tagsColumns } from "./tags-position-colums";
 
 const database = getDatabase(firebase);
 
@@ -110,101 +113,120 @@ const RoomMap = ({ room }: { room: Room }) => {
     });
   }, []);
 
+  useEffect(() => {
+    console.log(stations, tags, pxMeter);
+  }, [stations, tags, pxMeter]);
+
   return (
-    <div
-      className="flex h-[calc(100vh-226px)] w-full flex-col items-center justify-center"
-      id="room-map"
-    >
-      <Stage width={withMap} height={heightMap}>
-        <Layer>
-          <MapBackground
-            url={room.map as string}
-            width={withMap}
-            height={heightMap}
-          />
-          {stations.map((station: any, i: any) => {
-            return (
-              <Group key={i}>
-                <Circle
-                  x={station.x}
-                  y={station.y}
-                  radius={15}
-                  fill="green"
-                  draggable
-                  onDragEnd={async (e) => {
-                    const newStations = stations.slice();
-                    if (Math.round(e.target.x()) < 0) {
-                      newStations[i].x = 0;
-                    } else if (Math.round(e.target.x()) > withMap) {
-                      newStations[i].x = withMap;
-                    } else {
-                      newStations[i].x = Math.round(e.target.x());
-                    }
-                    if (Math.round(e.target.y()) < 0) {
-                      newStations[i].y = 0;
-                    } else if (Math.round(e.target.y()) > heightMap) {
-                      newStations[i].y = heightMap;
-                    } else {
-                      newStations[i].y = Math.round(e.target.y());
-                    }
-                    // Update station position in Realtime Database
-                    await set(
-                      ref(
-                        database,
-                        "rooms/" +
-                          room.id +
-                          "/stations/" +
-                          station.id +
-                          "/position",
-                      ),
-                      {
-                        x: Math.round(e.target.x()),
-                        y: Math.round(e.target.y()),
-                      },
-                    );
-                    setStations(newStations);
-                  }}
-                />
-                <Text
-                  x={station.x + 10}
-                  y={station.y - 10}
-                  text={`(${station.x}, ${station.y})`}
-                />
-                <Text
-                  x={station.x + 10}
-                  y={station.y - 30}
-                  text={`${station.name}`}
-                />
-              </Group>
-            );
-          })}
-          {tags.map((tag: any, i: any) => {
-            if (!tag.stations || tag.stations.length < 3) return;
-            if (Object.keys(stationsRaw).length < 3) return;
-            const tagPosition = locate(tag.stations, stationsRaw, pxMeter);
-            return (
-              <Group key={i}>
-                <Circle
-                  x={tagPosition.x}
-                  y={tagPosition.y}
-                  radius={10}
-                  fill="red"
-                />
-                <Text
-                  x={tagPosition.x + 10}
-                  y={tagPosition.y - 10}
-                  text={`(${tagPosition.x}, ${tagPosition.y})`}
-                />
-                <Text
-                  x={tagPosition.x + 10}
-                  y={tagPosition.y - 30}
-                  text={`${tag.name}`}
-                />
-              </Group>
-            );
-          })}
-        </Layer>
-      </Stage>
+    <div className="flex w-full flex-col gap-10">
+      <div
+        className="flex h-[calc(100vh-226px)] w-full flex-col items-center justify-center"
+        id="room-map"
+      >
+        <Stage width={withMap} height={heightMap}>
+          <Layer>
+            <MapBackground
+              url={room.map as string}
+              width={withMap}
+              height={heightMap}
+            />
+            {stations.map((station: any, i: any) => {
+              return (
+                <Group key={i}>
+                  <Circle
+                    x={station.x}
+                    y={station.y}
+                    radius={15}
+                    fill="green"
+                    draggable
+                    onDragEnd={async (e) => {
+                      const newStations = stations.slice();
+                      if (Math.round(e.target.x()) < 0) {
+                        newStations[i].x = 0;
+                      } else if (Math.round(e.target.x()) > withMap) {
+                        newStations[i].x = withMap;
+                      } else {
+                        newStations[i].x = Math.round(e.target.x());
+                      }
+                      if (Math.round(e.target.y()) < 0) {
+                        newStations[i].y = 0;
+                      } else if (Math.round(e.target.y()) > heightMap) {
+                        newStations[i].y = heightMap;
+                      } else {
+                        newStations[i].y = Math.round(e.target.y());
+                      }
+                      // Update station position in Realtime Database
+                      await set(
+                        ref(
+                          database,
+                          "rooms/" +
+                            room.id +
+                            "/stations/" +
+                            station.id +
+                            "/position",
+                        ),
+                        {
+                          x: Math.round(e.target.x()),
+                          y: Math.round(e.target.y()),
+                        },
+                      );
+                      setStations(newStations);
+                    }}
+                  />
+                  <Text
+                    x={station.x + 10}
+                    y={station.y - 10}
+                    text={`(${station.x}, ${station.y})`}
+                  />
+                  <Text
+                    x={station.x + 10}
+                    y={station.y - 30}
+                    text={`${station.name}`}
+                  />
+                </Group>
+              );
+            })}
+            {tags.map((tag: any, i: any) => {
+              if (!tag.stations || tag.stations.length < 3) return;
+              if (Object.keys(stationsRaw).length < 3) return;
+              const tagPosition = locate(tag.stations, stationsRaw, pxMeter);
+              return (
+                <Group key={i}>
+                  <Circle
+                    x={tagPosition.x}
+                    y={tagPosition.y}
+                    radius={10}
+                    fill="red"
+                  />
+                  <Text
+                    x={tagPosition.x + 10}
+                    y={tagPosition.y - 10}
+                    text={`(${tagPosition.x}, ${tagPosition.y})`}
+                  />
+                  <Text
+                    x={tagPosition.x + 10}
+                    y={tagPosition.y - 30}
+                    text={`${tag.name}`}
+                  />
+                </Group>
+              );
+            })}
+          </Layer>
+        </Stage>
+      </div>
+      <div className="flex w-full flex-row gap-10 md:flex-col">
+        <DataTable
+          columns={tagsColumns}
+          data={
+            tags.map((tag) => {
+              return {
+                ...tag,
+                raw: stations,
+              };
+            }) as TagPosition[]
+          }
+        />
+      </div>
     </div>
   );
 };
