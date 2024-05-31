@@ -9,6 +9,8 @@ import { useEffect, useState } from "react";
 import { Circle, Group, Image, Layer, Stage, Text } from "react-konva";
 import useImage from "use-image";
 import { columns as tagsColumns } from "./tags-position-colums";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const database = getDatabase(firebase);
 
@@ -35,6 +37,8 @@ const RoomMap = ({ room }: { room: Room }) => {
   const [stationsRaw, setStationsRaw] = useState<any>({});
   const [tags, setTags] = useState<any[]>([]);
   const [pxMeter, setPxMeter] = useState(0);
+  const [txPower, setTxPower] = useState(-60);
+  const [nRange, setNRange] = useState(3);
 
   // Calculate the width and height of the map to fit the div id "room-map"
   useEffect(() => {
@@ -70,7 +74,6 @@ const RoomMap = ({ room }: { room: Room }) => {
         setHeightMap(newHeight);
       }
     }
-    setPxMeter(screenWidth / width);
   }, [room.map, room.width, room.height]);
 
   // Get stations by room id from Realtime Database
@@ -97,25 +100,28 @@ const RoomMap = ({ room }: { room: Room }) => {
   }, [room.id]);
 
   useEffect(() => {
-    onValue(ref(database, "rooms/" + room.id + "/tags"), (snapshot) => {
-      // return new data of stations just get position
-      const data = snapshot.val();
-      if (data) {
-        const tags = Object.keys(data).map((key) => {
-          return {
-            id: key,
-            name: snapshot.val()[key].name || "",
-            stations: snapshot.val()[key].stations || [],
-          };
-        });
-        setTags(tags);
-      }
-    });
-  }, []);
+    setTimeout(() => {
+      onValue(ref(database, "rooms/" + room.id + "/tags"), (snapshot) => {
+        // return new data of stations just get position
+        const data = snapshot.val();
+        if (data) {
+          const tags = Object.keys(data).map((key) => {
+            return {
+              id: key,
+              name: snapshot.val()[key].name || "",
+              stations: snapshot.val()[key].stations || [],
+            };
+          });
+          setTags(tags);
+        }
+      });
+    }, 500);
+  }, [room.id]);
 
+  // Set pxMeter from withMap and heightMap
   useEffect(() => {
-    console.log(stations, tags, pxMeter);
-  }, [stations, tags, pxMeter]);
+    setPxMeter(withMap / room.width);
+  }, [room.width, withMap]);
 
   return (
     <div className="flex w-full flex-col gap-10">
@@ -189,7 +195,13 @@ const RoomMap = ({ room }: { room: Room }) => {
             {tags.map((tag: any, i: any) => {
               if (!tag.stations || tag.stations.length < 3) return;
               if (Object.keys(stationsRaw).length < 3) return;
-              const tagPosition = locate(tag.stations, stationsRaw, pxMeter);
+              const tagPosition = locate(
+                tag.stations,
+                stationsRaw,
+                pxMeter,
+                txPower,
+                nRange,
+              );
               return (
                 <Group key={i}>
                   <Circle
@@ -215,6 +227,30 @@ const RoomMap = ({ room }: { room: Room }) => {
         </Stage>
       </div>
       <div className="flex w-full flex-row gap-10 md:flex-col">
+        <div className="flex w-full flex-col gap-10 md:flex-row">
+          <div className="flex w-1/4 items-center justify-center gap-3">
+            <Label>TX Power</Label>
+            <Input
+              type="number"
+              value={txPower}
+              onChange={(e) => {
+                setTxPower(parseInt(e.target.value));
+              }}
+            />
+          </div>
+          <div className="flex w-1/4 items-center justify-center gap-3">
+            <Label>N Range</Label>
+            <Input
+              type="number"
+              min={2}
+              max={4}
+              value={nRange}
+              onChange={(e) => {
+                setNRange(parseInt(e.target.value));
+              }}
+            />
+          </div>
+        </div>
         <DataTable
           columns={tagsColumns}
           data={
