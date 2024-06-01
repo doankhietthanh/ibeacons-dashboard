@@ -2,15 +2,13 @@ import { RoomAction } from "@/actions/rooms";
 import DataTable from "@/components/data-table";
 import { locate } from "@/lib/beacon";
 import firebase from "@/lib/firebase";
-import { Room } from "@/types/room";
+import { Room, RoomSettings as RoomSettingsType } from "@/types/room";
 import { TagPosition } from "@/types/tags";
 import { getDatabase, onValue, ref, set } from "@firebase/database";
 import { useEffect, useState } from "react";
 import { Circle, Group, Image, Layer, Stage, Text } from "react-konva";
 import useImage from "use-image";
 import { columns as tagsColumns } from "./tags-position-colums";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 const database = getDatabase(firebase);
 
@@ -29,7 +27,13 @@ const MapBackground = ({
   );
 };
 
-const RoomMap = ({ room }: { room: Room }) => {
+const RoomMap = ({
+  room,
+  settings,
+}: {
+  room: Room;
+  settings: RoomSettingsType | null;
+}) => {
   const [withMap, setWithMap] = useState(room.width);
   const [heightMap, setHeightMap] = useState(room.height);
 
@@ -37,8 +41,6 @@ const RoomMap = ({ room }: { room: Room }) => {
   const [stationsRaw, setStationsRaw] = useState<any>({});
   const [tags, setTags] = useState<any[]>([]);
   const [pxMeter, setPxMeter] = useState(0);
-  const [txPower, setTxPower] = useState(-60);
-  const [nRange, setNRange] = useState(3);
 
   // Calculate the width and height of the map to fit the div id "room-map"
   useEffect(() => {
@@ -124,9 +126,9 @@ const RoomMap = ({ room }: { room: Room }) => {
   }, [room.width, withMap]);
 
   return (
-    <div className="flex w-full flex-col gap-10">
+    <div className="flex w-full flex-col gap-10 md:flex-row">
       <div
-        className="flex h-[calc(100vh-226px)] w-full flex-col items-center justify-center"
+        className="flex h-[calc(100vh-226px)] w-full flex-col items-center justify-center md:w-3/4"
         id="room-map"
       >
         <Stage width={withMap} height={heightMap}>
@@ -199,8 +201,8 @@ const RoomMap = ({ room }: { room: Room }) => {
                 tag.stations,
                 stationsRaw,
                 pxMeter,
-                txPower,
-                nRange,
+                settings?.txPower || -60,
+                settings?.nRange || 3,
               );
               return (
                 <Group key={i}>
@@ -226,31 +228,7 @@ const RoomMap = ({ room }: { room: Room }) => {
           </Layer>
         </Stage>
       </div>
-      <div className="flex w-full flex-row gap-10 md:flex-col">
-        <div className="flex w-full flex-col gap-10 md:flex-row">
-          <div className="flex w-1/4 items-center justify-center gap-3">
-            <Label>TX Power</Label>
-            <Input
-              type="number"
-              value={txPower}
-              onChange={(e) => {
-                setTxPower(parseInt(e.target.value));
-              }}
-            />
-          </div>
-          <div className="flex w-1/4 items-center justify-center gap-3">
-            <Label>N Range</Label>
-            <Input
-              type="number"
-              min={2}
-              max={4}
-              value={nRange}
-              onChange={(e) => {
-                setNRange(parseInt(e.target.value));
-              }}
-            />
-          </div>
-        </div>
+      <div className="flex w-full flex-row gap-10 md:w-1/4 md:flex-col">
         <DataTable
           columns={tagsColumns}
           data={

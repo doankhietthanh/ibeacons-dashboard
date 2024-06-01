@@ -41,3 +41,8 @@ export interface RoomUpdate {
   createdAt?: Date;
   updatedAt?: Date;
 }
+
+export interface RoomSettings {
+  txPower?: number;
+  nRange?: number;
+}

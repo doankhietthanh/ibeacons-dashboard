@@ -3,13 +3,13 @@ import firebase from "@/lib/firebase";
 import { doc, getDoc, getFirestore } from "firebase/firestore";
 import { ERROR_MESSAGE, STATUS_RESPONSE, SUCCESS_MESSAGE } from "@/constants";
 import { RoomAction } from "@/actions/rooms";
-import { getUserCreatedInfo, getUserUpdatedInfo } from "@/common/user";
+import { getUserUpdatedInfo } from "@/common/user";
 import { deleteDoc, setDoc, updateDoc } from "@firebase/firestore";
 import { Collections } from "@/types/collections";
 import { convertUndefinedToNull } from "@/common";
 import { Room } from "@/types/room";
 import { Tag, TagCreate, TagUpdate } from "@/types/tags";
-import { getDatabase, ref, set } from "@firebase/database";
+import { getDatabase, ref, remove, set } from "@firebase/database";
 
 const auth = getAuth(firebase);
 const db = getFirestore(firebase);
@@ -122,11 +122,23 @@ export class TagAction {
           };
         }
       }
-      // Add user created info
-      tag = {
-        ...convertUndefinedToNull(tag),
-        ...getUserCreatedInfo(user),
-      };
+      // Check if tag existed
+      const tagsExisted = await this.getTags();
+      if (
+        tagsExisted.data?.find((_tag) => {
+          if (_tag.macAddress === tag.macAddress) {
+            return {
+              status: STATUS_RESPONSE.ERROR,
+              message: ERROR_MESSAGE.EXISTED,
+            };
+          }
+        })
+      ) {
+        return {
+          status: STATUS_RESPONSE.ERROR,
+          message: ERROR_MESSAGE.EXISTED,
+        };
+      }
       // Create room
       await setDoc(doc(db, Collections.TAGS, tag.id), tag);
       // Update tags in room
@@ -247,9 +259,12 @@ export class TagAction {
       }
       // Delete tag
       await deleteDoc(doc(db, Collections.TAGS, id));
+
       // Update tags in room
       if (tag.data?.room) {
         const roomId = (tag.data.room as Room).id;
+        // Delete tag in real-time database
+        await remove(ref(rtDb, `rooms/${roomId}/tags/${id}`));
         const room = await this.roomAction.getRoom(roomId);
         if (room.status === STATUS_RESPONSE.ERROR) {
           return {

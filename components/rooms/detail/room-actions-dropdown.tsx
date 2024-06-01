@@ -10,24 +10,33 @@ import { Button } from "@/components/ui/button";
 import {
   EllipsisVerticalIcon,
   PencilIcon,
+  SettingsIcon,
   TrashIcon,
   UserRoundPlus,
 } from "lucide-react";
-import { Room } from "@/types/room";
+import { Room, RoomSettings as RoomSettingsType } from "@/types/room";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import EditRoom from "@/components/rooms/detail/edit-room";
 import AddMembers from "@/components/rooms/detail/add-members";
 import AddDevices from "@/components/rooms/detail/add-devices";
 import DeleteRoom from "@/components/rooms/detail/delete-room";
+import RoomSettings from "@/components/rooms/detail/room-settings";
 
 enum RoomDialogItem {
   EditRoom,
   AddMembers,
   AddDevices,
   DeleteRoom,
+  RoomSettings,
 }
 
-const RoomActionsDropdown = ({ room }: { room: Room }) => {
+const RoomActionsDropdown = ({
+  room,
+  settings,
+}: {
+  room: Room;
+  settings: RoomSettingsType | null;
+}) => {
   const [dialogItem, setRoomDialogItem] = React.useState<RoomDialogItem | null>(
     null,
   );
@@ -64,6 +73,17 @@ const RoomActionsDropdown = ({ room }: { room: Room }) => {
                 <span>Add Members</span>
               </DropdownMenuItem>
             </DialogTrigger>
+            <DialogTrigger
+              asChild
+              onClick={() => {
+                setRoomDialogItem(RoomDialogItem.RoomSettings);
+              }}
+            >
+              <DropdownMenuItem>
+                <SettingsIcon className="mr-2 h-4 w-4" />
+                <span>Room Settings</span>
+              </DropdownMenuItem>
+            </DialogTrigger>
             {/*<DialogTrigger*/}
             {/*  asChild*/}
             {/*  onClick={() => {*/}
@@ -95,6 +115,9 @@ const RoomActionsDropdown = ({ room }: { room: Room }) => {
       {dialogItem === RoomDialogItem.AddMembers && <AddMembers room={room} />}
       {dialogItem === RoomDialogItem.AddDevices && <AddDevices room={room} />}
       {dialogItem === RoomDialogItem.DeleteRoom && <DeleteRoom room={room} />}
+      {dialogItem === RoomDialogItem.RoomSettings && (
+        <RoomSettings room={room} settings={settings} />
+      )}
     </Dialog>
   );
 };

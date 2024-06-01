@@ -23,3 +23,8 @@ export const UpdateRoomSchema = z.object({
   backgroundCover: z.string().url().optional(),
   members: z.array(MemberSchema).optional(),
 });
+
+export const RoomSettingsSchema = z.object({
+  txPower: z.coerce.number().int().optional(),
+  nRange: z.coerce.number().int().min(2).max(4).optional(),
+});

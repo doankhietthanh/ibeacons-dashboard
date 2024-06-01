@@ -17,7 +17,7 @@ import { Collections } from "@/types/collections";
 import { convertUndefinedToNull } from "@/common";
 import { Station, StationCreate, StationUpdate } from "@/types/stations";
 import { Room } from "@/types/room";
-import { getDatabase, ref, set } from "@firebase/database";
+import { getDatabase, ref, remove, set } from "@firebase/database";
 
 const auth = getAuth(firebase);
 const db = getFirestore(firebase);
@@ -128,6 +128,15 @@ export class StationAction {
         return {
           status: STATUS_RESPONSE.SUCCESS,
           message: ERROR_MESSAGE.USER_NOT_FOUND,
+        };
+      }
+      // Check unique id
+      const stationDoc = doc(db, Collections.STATIONS, station.id);
+      const stationSnap = await getDoc(stationDoc);
+      if (stationSnap.exists()) {
+        return {
+          status: STATUS_RESPONSE.ERROR,
+          message: ERROR_MESSAGE.EXISTED,
         };
       }
       // Check user has permission in room
@@ -272,9 +281,12 @@ export class StationAction {
       }
       // Delete station
       await deleteDoc(doc(db, Collections.STATIONS, id));
+
       // Update stations in room
       if (station.data?.room) {
         const roomId = (station.data.room as Room).id;
+        // Delete station in real-time database
+        await remove(ref(rtDb, `rooms/${roomId}/stations/${id}`));
         const room = await this.roomAction.getRoom(roomId);
         if (room.status === STATUS_RESPONSE.ERROR) {
           return {

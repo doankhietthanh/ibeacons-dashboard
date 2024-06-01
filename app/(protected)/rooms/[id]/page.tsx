@@ -5,7 +5,7 @@ import React, { useEffect, useState, useTransition } from "react";
 import { Separator } from "@/components/ui/separator";
 import Loader from "@/components/loader";
 import ErrorAlert from "@/components/error-alert";
-import { Room } from "@/types/room";
+import { Room, RoomSettings } from "@/types/room";
 import { RoomAction } from "@/actions/rooms";
 import { STATUS_RESPONSE } from "@/constants";
 import RoomActionsDropdown from "@/components/rooms/detail/room-actions-dropdown";
@@ -18,9 +18,15 @@ const RoomMap = dynamic(
   },
 );
 
-const RoomDetailPage = ({ params }: { params: { id: string } }) => {
+const RoomDetailPage = ({
+  params,
+}: {
+  params: { id: string };
+  settings: RoomSettings | null;
+}) => {
   const [isPending, startTransition] = useTransition();
   const [room, setRoom] = useState<Room | null>(null);
+  const [roomSettings, setRoomSettings] = useState<RoomSettings | null>(null); // [1
   const [error, setError] = useState<any>(null);
 
   useEffect(() => {
@@ -29,6 +35,14 @@ const RoomDetailPage = ({ params }: { params: { id: string } }) => {
       const response = await roomAction.getRoom(params.id);
       if (response.status === STATUS_RESPONSE.SUCCESS) {
         setRoom(response.data as Room);
+        // Get room settings
+        const settings = await roomAction.getSettings(params.id);
+        if (settings.status === STATUS_RESPONSE.SUCCESS) {
+          setRoomSettings(settings.data as RoomSettings);
+        }
+        if (settings.status === STATUS_RESPONSE.ERROR) {
+          setError(settings);
+        }
       }
       if (response.status === STATUS_RESPONSE.ERROR) {
         setError(response);
@@ -69,11 +83,11 @@ const RoomDetailPage = ({ params }: { params: { id: string } }) => {
             {room.description}
           </p>
         </div>
-        <RoomActionsDropdown room={room} />
+        <RoomActionsDropdown room={room} settings={roomSettings} />
       </div>
       <Separator className="my-6" />
       <div className="flex flex-col space-y-8 lg:flex-row lg:space-x-12 lg:space-y-0">
-        <RoomMap room={room} />
+        <RoomMap room={room} settings={roomSettings} />
       </div>
     </div>
   );

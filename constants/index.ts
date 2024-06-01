@@ -18,6 +18,7 @@ export enum ERROR_MESSAGE {
   DELETED_FAILED = "Failed to delete. Please try again.",
   GET_FAILED = "Failed to get. Please try again.",
   PERMISSION_DENIED = "Permission denied.",
+  EXISTED = "Item existed.",
 }
 
 export enum LOCAL_STORAGE_KEY {

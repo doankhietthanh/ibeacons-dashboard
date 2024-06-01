@@ -1,4 +1,4 @@
-import { Room, RoomUpdate } from "@/types/room";
+import { Room, RoomSettings, RoomUpdate } from "@/types/room";
 import firebase from "@/lib/firebase";
 import { getAuth } from "firebase/auth";
 import { getUserCreatedInfo, getUserUpdatedInfo } from "@/common/user";
@@ -297,6 +297,65 @@ export class RoomAction {
       console.error(error);
       return {
         status: STATUS_RESPONSE.ERROR,
+        message: error || ERROR_MESSAGE.UPDATED_FAILED,
+      };
+    }
+  };
+
+  getSettings = async (id: string) => {
+    try {
+      // Check if user is authenticated
+      const user = auth.currentUser;
+      if (!user) {
+        return {
+          status: STATUS_RESPONSE.SUCCESS,
+          message: ERROR_MESSAGE.USER_NOT_FOUND,
+        };
+      }
+      // Get settings
+      const settingsDoc = doc(db, Collections.SETTINGS + "/rooms/");
+      const settingsSnap = await getDoc(settingsDoc);
+      if (!settingsSnap.exists()) {
+        return {
+          status: STATUS_RESPONSE.ERROR,
+          message: ERROR_MESSAGE.GET_FAILED,
+        };
+      }
+      return {
+        status: STATUS_RESPONSE.SUCCESS,
+        data: settingsSnap.data()[id],
+      };
+    } catch (error) {
+      console.error(error);
+      return {
+        status: STATUS_RESPONSE.ERROR,
+        message: error || ERROR_MESSAGE.GET_FAILED,
+      };
+    }
+  };
+
+  updateSettings = async (id: string, settings: RoomSettings) => {
+    try {
+      // Check if user is authenticated
+      const user = auth.currentUser;
+      if (!user) {
+        return {
+          status: STATUS_RESPONSE.SUCCESS,
+          message: ERROR_MESSAGE.USER_NOT_FOUND,
+        };
+      }
+      // Update room
+      await setDoc(doc(db, Collections.SETTINGS + "/rooms/"), {
+        [id]: settings,
+      });
+      return {
+        status: STATUS_RESPONSE.SUCCESS,
+        message: SUCCESS_MESSAGE.UPDATED_SUCCESS,
+      };
+    } catch (error) {
+      console.error(error);
+      return {
+        success: STATUS_RESPONSE.ERROR,
         message: error || ERROR_MESSAGE.UPDATED_FAILED,
       };
     }
