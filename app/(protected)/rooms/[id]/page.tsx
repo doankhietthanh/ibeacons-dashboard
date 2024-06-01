@@ -18,12 +18,7 @@ const RoomMap = dynamic(
   },
 );
 
-const RoomDetailPage = ({
-  params,
-}: {
-  params: { id: string };
-  settings: RoomSettings | null;
-}) => {
+const RoomDetailPage = ({ params }: { params: { id: string } }) => {
   const [isPending, startTransition] = useTransition();
   const [room, setRoom] = useState<Room | null>(null);
   const [roomSettings, setRoomSettings] = useState<RoomSettings | null>(null); // [1

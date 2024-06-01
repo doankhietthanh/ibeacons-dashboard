@@ -6,26 +6,11 @@ import { Room, RoomSettings as RoomSettingsType } from "@/types/room";
 import { TagPosition } from "@/types/tags";
 import { getDatabase, onValue, ref, set } from "@firebase/database";
 import { useEffect, useState } from "react";
-import { Circle, Group, Image, Layer, Stage, Text } from "react-konva";
+import { Group, Image, Layer, Stage, Text } from "react-konva";
 import useImage from "use-image";
 import { columns as tagsColumns } from "./tags-position-colums";
 
 const database = getDatabase(firebase);
-
-const MapBackground = ({
-  url,
-  width,
-  height,
-}: {
-  url: string;
-  width: number;
-  height: number;
-}) => {
-  const [image] = useImage(url);
-  return (
-    <Image image={image} alt="map-background" width={width} height={height} />
-  );
-};
 
 const RoomMap = ({
   room,
@@ -34,6 +19,10 @@ const RoomMap = ({
   room: Room;
   settings: RoomSettingsType | null;
 }) => {
+  const [roomImage] = useImage(room.map as string);
+  const [stationImage] = useImage("/station.png");
+  const [tagImage] = useImage("/tag.png");
+
   const [withMap, setWithMap] = useState(room.width);
   const [heightMap, setHeightMap] = useState(room.height);
 
@@ -128,24 +117,27 @@ const RoomMap = ({
   return (
     <div className="flex w-full flex-col gap-10 md:flex-row">
       <div
-        className="flex h-[calc(100vh-226px)] w-full flex-col items-center justify-center md:w-3/4"
+        className="flex h-[calc(100vh-226px)] w-full flex-col items-center justify-center rounded-md border-2 md:w-3/4"
         id="room-map"
       >
         <Stage width={withMap} height={heightMap}>
           <Layer>
-            <MapBackground
-              url={room.map as string}
+            <Image
+              image={roomImage}
               width={withMap}
               height={heightMap}
+              alt="bg"
             />
             {stations.map((station: any, i: any) => {
               return (
                 <Group key={i}>
-                  <Circle
+                  <Image
+                    image={stationImage}
                     x={station.x}
                     y={station.y}
-                    radius={15}
-                    fill="green"
+                    width={60}
+                    height={60}
+                    alt="station"
                     draggable
                     onDragEnd={async (e) => {
                       const newStations = stations.slice();
@@ -206,11 +198,13 @@ const RoomMap = ({
               );
               return (
                 <Group key={i}>
-                  <Circle
+                  <Image
+                    image={tagImage}
+                    alt="tag"
+                    width={20}
+                    height={35}
                     x={tagPosition.x}
                     y={tagPosition.y}
-                    radius={10}
-                    fill="red"
                   />
                   <Text
                     x={tagPosition.x + 10}

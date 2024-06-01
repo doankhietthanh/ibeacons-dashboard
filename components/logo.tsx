@@ -8,7 +8,7 @@ const Logo = () => {
       href="/"
       className="flex items-center justify-center space-x-2 md:mr-6 md:justify-start"
     >
-      <Icons.twitter className="h-6 w-6" />
+      <Icons.logo className="h-6 w-6" />
       <span className="hidden font-bold sm:inline-block">
         {siteConfig.name}
       </span>
