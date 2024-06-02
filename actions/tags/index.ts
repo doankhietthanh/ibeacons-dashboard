@@ -3,7 +3,7 @@ import firebase from "@/lib/firebase";
 import { doc, getDoc, getFirestore } from "firebase/firestore";
 import { ERROR_MESSAGE, STATUS_RESPONSE, SUCCESS_MESSAGE } from "@/constants";
 import { RoomAction } from "@/actions/rooms";
-import { getUserUpdatedInfo } from "@/common/user";
+import { getUserCreatedInfo, getUserUpdatedInfo } from "@/common/user";
 import { deleteDoc, setDoc, updateDoc } from "@firebase/firestore";
 import { Collections } from "@/types/collections";
 import { convertUndefinedToNull } from "@/common";
@@ -139,6 +139,11 @@ export class TagAction {
           message: ERROR_MESSAGE.EXISTED,
         };
       }
+      // Add user created info
+      tag = {
+        ...convertUndefinedToNull(tag),
+        ...getUserCreatedInfo(user),
+      };
       // Create room
       await setDoc(doc(db, Collections.TAGS, tag.id), tag);
       // Update tags in room
