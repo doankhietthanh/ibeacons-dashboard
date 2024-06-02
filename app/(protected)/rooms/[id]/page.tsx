@@ -35,9 +35,6 @@ const RoomDetailPage = ({ params }: { params: { id: string } }) => {
         if (settings.status === STATUS_RESPONSE.SUCCESS) {
           setRoomSettings(settings.data as RoomSettings);
         }
-        if (settings.status === STATUS_RESPONSE.ERROR) {
-          setError(settings);
-        }
       }
       if (response.status === STATUS_RESPONSE.ERROR) {
         setError(response);
