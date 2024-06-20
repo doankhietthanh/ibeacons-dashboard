@@ -131,14 +131,14 @@ export class StationAction {
         };
       }
       // Check unique id
-      const stationDoc = doc(db, Collections.STATIONS, station.id);
-      const stationSnap = await getDoc(stationDoc);
-      if (stationSnap.exists()) {
-        return {
-          status: STATUS_RESPONSE.ERROR,
-          message: ERROR_MESSAGE.EXISTED,
-        };
-      }
+      // const stationDoc = doc(db, Collections.STATIONS, station.id);
+      // const stationSnap = await getDoc(stationDoc);
+      // if (stationSnap.exists()) {
+      //   return {
+      //     status: STATUS_RESPONSE.ERROR,
+      //     message: ERROR_MESSAGE.EXISTED,
+      //   };
+      // }
       // Check user has permission in room
       let room;
       if (station.room) {
